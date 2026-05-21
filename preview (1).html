@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MP Delícias - Prévia do Site</title>
+  <style>
+    *{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:#fff1f5;color:#222}
+    header{position:sticky;top:0;background:white;border-bottom:1px solid #ffd3df;z-index:5}
+    .top{max-width:1200px;margin:auto;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .brand{display:flex;gap:12px;align-items:center}.logo{width:54px;height:54px;border-radius:18px;background:linear-gradient(135deg,#ec407a,#ffca28);display:grid;place-items:center;color:white;font-weight:900;font-size:22px}
+    .wrap{max-width:1200px;margin:auto;padding:20px;display:grid;grid-template-columns:1fr 360px;gap:20px}
+    .hero{background:linear-gradient(135deg,#e91e63,#ffca28);border-radius:26px;color:white;padding:28px;position:relative;overflow:hidden}.hero h1{font-size:40px;margin:5px 0}.hero .food{position:absolute;right:20px;bottom:-20px;font-size:100px;opacity:.25}
+    .pill,.btn{border:0;border-radius:14px;padding:10px 14px;font-weight:700;cursor:pointer}.btn{background:#e91e63;color:white}.btn.dark{background:#222}.btn.green{background:#16a34a}.btn.gray{background:#eee;color:#222}.btn:disabled{background:#bbb;cursor:not-allowed}
+    .status{padding:10px 14px;border-radius:999px;font-weight:700}.open{background:#dcfce7;color:#166534}.closed{background:#e5e7eb;color:#555}
+    .search{display:flex;gap:10px;margin:16px 0;overflow:auto}.search input{flex:1;min-width:220px;border:1px solid #ffd3df;border-radius:16px;padding:14px}
+    .cats{display:flex;gap:8px;overflow:auto;margin:12px 0}.cat{background:white;border:1px solid #ffd3df;color:#333}.cat.active{background:#e91e63;color:white}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{background:white;border:1px solid #ffd3df;border-radius:22px;padding:14px;box-shadow:0 3px 10px #00000008}.photo{height:115px;border-radius:18px;background:#ffe0ea;display:grid;place-items:center;font-size:42px;position:relative}.tag{font-size:12px;color:#e91e63;font-weight:900;text-transform:uppercase}.card h3{margin:8px 0 5px}.desc{font-size:13px;color:#666;min-height:48px}.price{font-size:20px;font-weight:900}.old{text-decoration:line-through;color:#999;font-size:12px}
+    aside{position:sticky;top:88px;height:max-content}.box{background:white;border:1px solid #ffd3df;border-radius:24px;padding:16px;box-shadow:0 3px 10px #00000008}.item{border-bottom:1px solid #ffe0ea;padding:10px 0}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.field{width:100%;border:1px solid #ffd3df;border-radius:13px;padding:12px;margin:5px 0}.total{background:#fff1f5;border-radius:16px;padding:12px;margin-top:10px}
+    .admin{max-width:1200px;margin:0 auto 30px;padding:0 20px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.table{width:100%;border-collapse:collapse}.table td,.table th{border-bottom:1px solid #ffe0ea;padding:10px;text-align:left}.small{font-size:13px;color:#666}.notice{background:#222;color:white;border-radius:18px;padding:15px;margin:14px 0}.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media(max-width:900px){.wrap{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}aside{position:static}.hero h1{font-size:30px}}
+    @media(max-width:560px){.grid{grid-template-columns:1fr}.top{align-items:flex-start}.hero h1{font-size:26px}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div class="brand"><div class="logo">MP</div><div><b style="font-size:22px">MP Delícias</b><div class="small">Pedido online • Araxá/MG</div></div></div>
+    <div class="row"><span id="status" class="status open">Loja aberta</span><button class="btn dark" onclick="toggleAdmin()">Admin</button></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <main>
+    <section class="hero">
+      <div>Ingredientes selecionados para melhor te atender</div>
+      <h1>Peça sua delícia sem sair de casa</h1>
+      <p>Mexidão, salgados, tapiocas, macarrões, omeletes, sucos, vitaminas e bebidas.</p>
+      <b>PIX CPF: 15978014612 • WhatsApp: +55 34 8719-6724</b>
+      <div class="food">🍝</div>
+    </section>
+    <div id="closedMsg" class="notice" style="display:none">Loja fechada no momento. Voltamos amanhã às 10:30.</div>
+    <div class="search"><input id="q" placeholder="Buscar produto..." oninput="renderProducts()"></div>
+    <div id="cats" class="cats"></div>
+    <section id="products" class="grid"></section>
+  </main>
+  <aside>
+    <div class="box">
+      <h2>🛒 Carrinho</h2>
+      <div id="cart"></div>
+      <div class="row" style="margin:10px 0">
+        <button id="entrega" class="btn" onclick="delivery='Entrega';renderCart()">Entrega</button>
+        <button id="retirada" class="btn gray" onclick="delivery='Retirada';renderCart()">Retirada</button>
+      </div>
+      <input id="nome" class="field" placeholder="Nome do cliente">
+      <input id="fone" class="field" placeholder="Telefone">
+      <input id="endereco" class="field" placeholder="Endereço completo">
+      <textarea id="obs" class="field" placeholder="Observação geral"></textarea>
+      <select id="pagamento" class="field"><option>PIX</option><option>Dinheiro</option><option>Cartão</option></select>
+      <input id="cupom" class="field" placeholder="Cupom: MP10" oninput="renderCart()">
+      <div id="totals" class="total"></div>
+      <button id="finish" class="btn green" style="width:100%;padding:15px;margin-top:10px" onclick="finishOrder()">Finalizar no WhatsApp</button>
+    </div>
+  </aside>
+</div>
+
+<section id="admin" class="admin" style="display:none">
+  <div class="box">
+    <h2>🔐 Painel administrador MP Delícias</h2>
+    <div class="tabs">
+      <button class="btn dark" onclick="tab='pedidos';renderAdmin()">Pedidos</button>
+      <button class="btn dark" onclick="tab='produtos';renderAdmin()">Produtos</button>
+      <button class="btn dark" onclick="tab='loja';renderAdmin()">Loja</button>
+      <button class="btn dark" onclick="tab='financeiro';renderAdmin()">Fechamento</button>
+    </div>
+    <div id="adminContent"></div>
+  </div>
+</section>
+
+<script>
+const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+let storeOpen=true, deliveryFee=10, delivery='Entrega', cat='Todos', tab='pedidos', expense=0;
+let cart=[], reports=[];
+let orders=[
+{id:'001', cliente:'Cliente teste', itens:'1x Combo Mexidão + Coca lata', total:35.90, pagamento:'PIX', status:'Recebido', tipo:'Entrega'},
+{id:'002', cliente:'Maria', itens:'2x Coxinha frango com Catupiry', total:21.80, pagamento:'Dinheiro', status:'Preparando', tipo:'Retirada'}
+];
+let products=[
+['Nosso Mexido Da Casa','Mexidão',29.90,'Mexido da casa. Serve 2 pessoas','🍛'],
+['Combo Dupla Mexidão + Coca 1l','Mexidão',62.90,'2 Mexidões da Casa completos + Coca-Cola 1l bem gelada.','🎁'],
+['Combo Mexidão + Coca lata','Mexidão',35.90,'Mexidão com arroz, ovos, calabresa, bacon e Coca-Cola 310ml.','🎁'],
+['Coxinha frango com Catupiry','Salgados',10.90,'Coxinha fresquinha com frango e Catupiry.','🥟'],
+['Kibe de carne','Salgados',11.00,'Kibe recheado com carne temperada.','🥟'],
+['Combo Salgado da Casa','Salgados',54.90,'3 salgados + Coca-Cola 1l.','🎁'],
+['Salgado Hambúrguer','Salgados',10.90,'Massa macia recheada com hambúrguer e queijo.','🍔'],
+['Combo Dupla Crocante + Coca 1l','Salgados',26.90,'Duas coxinhas crocantes + Coca-Cola 1 litro.','🎁'],
+['Sanduiche Natural','Sanduiche',20.90,'Sanduíche natural de frango com pão macio.','🥪'],
+['Tapioca De Frango Especial','Tapiocas',29.90,'Frango desfiado, muçarela e tomate.','🥙'],
+['Tapioca De Frango Premium','Tapiocas',29.90,'Frango, muçarela e cream cheese.','🥙'],
+['Tapioca De Frango Tradicional','Tapiocas',29.90,'Frango desfiado temperado e muçarela.','🥙'],
+['Tapioca Mista','Tapiocas',29.90,'Presunto, muçarela e tomate.','🥙'],
+['Tapioca De Ovo Cremosa','Tapiocas',29.90,'Ovo mexido, muçarela e tomate.','🥙'],
+['Tapioca De Presunto Cremoso','Tapiocas',29.90,'Presunto, muçarela e requeijão.','🥙'],
+['Ragu de carne G','Macarrões G',34.90,'Molho vermelho, carne desfiada, tomate, cheiro verde e mussarela.','🍝'],
+['Frango cremoso G','Macarrões G',34.90,'Molho rose, frango, milho, cebola e mussarela.','🍝'],
+['Macarrão a calabresa G','Macarrões G',34.90,'Molho vermelho, calabresa, tomate, milho e mussarela.','🍝'],
+['Especial da casa G','Macarrões G',34.90,'Molho rose, frango, bacon, cheiro verde e mussarela.','🍝'],
+['Bolonhesa G','Macarrões G',34.90,'Molho vermelho, carne bovina, tomate, palmito e parmesão.','🍝'],
+['Misto G','Macarrões G',34.90,'Carne bovina, frango, milho e requeijão.','🍝'],
+['Ragu de carne P','Macarrões P',26.90,'Molho vermelho, carne desfiada, tomate, cheiro verde e mussarela.','🍝'],
+['Frango cremoso P','Macarrões P',26.90,'Molho rose, frango, milho, cebola e mussarela.','🍝'],
+['Macarrão a calabresa P','Macarrões P',26.90,'Molho vermelho, calabresa, tomate, milho e mussarela.','🍝'],
+['Especial da casa P','Macarrões P',26.90,'Molho rose, frango, bacon, cheiro verde e mussarela.','🍝'],
+['Bolonhesa P','Macarrões P',26.90,'Molho vermelho, carne bovina, tomate, palmito e parmesão.','🍝'],
+['Misto P','Macarrões P',26.90,'Carne bovina, frango, milho e requeijão.','🍝'],
+['Omelete Misto','Omeletes',25.90,'Ovo, presunto, muçarela e orégano.','🍳'],
+['Omelete De Frango','Omeletes',25.90,'Frango, muçarela, requeijão e orégano.','🍳'],
+['Omelete Cremoso','Omeletes',25.90,'Muçarela, requeijão, cheddar e cream cheese.','🍳'],
+['Omelete Clássico','Omeletes',25.90,'Ovos, sal e cheiro verde.','🍳'],
+['Omelete Fit','Omeletes',25.90,'Ovo, tomate, palmito, cebola e milho.','🍳'],
+['Omelete De Queijo','Omeletes',25.90,'Ovo, muçarela, requeijão, sal e orégano.','🍳'],
+['Suco Morango 500 ml','Sucos Naturais',19.90,'Suco refrescante de morango.','🥤'],
+['Suco Maracujá 500 ml','Sucos Naturais',19.90,'Suco de maracujá equilibrado.','🥤'],
+['Suco Manga 500ml','Sucos Naturais',19.90,'Suco de manga tropical.','🥤'],
+['Suco Acerola com Laranja','Sucos Naturais',19.90,'Acerola com laranja rico em vitamina C.','🥤'],
+['Vitamina Banana Com Morango 500 ml','Vitaminas',22.90,'Banana cremosa com morango.','🥛'],
+['Vitamina Manga 500 ml','Vitaminas',22.90,'Vitamina suave de manga.','🥛'],
+['Vitamina De Maracujá 500 ml','Vitaminas',22.90,'Vitamina de maracujá.','🥛'],
+['Vitamina Morango 500 ml','Vitaminas',22.90,'Vitamina doce de morango.','🥛'],
+['Vitamina de açai 500 ml','Vitaminas',22.90,'Açaí cremoso e gelado.','🥛'],
+['Refrigerante Coca Cola 1l','Bebidas',11.99,'Coca-Cola 1 litro.','🥤'],
+['Fanta Uva 220ml','Bebidas',6.00,'Lata 220ml.','🥤'],
+['Fanta Laranja Mini Lata 220ml','Bebidas',6.00,'Lata 220ml.','🥤'],
+['Coca - Cola Lata 350 Ml','Bebidas',8.00,'Lata unidade.','🥤'],
+['Suco Del Valle Uva 250ml','Bebidas',6.00,'Embalagem 250ml.','🥤'],
+['Suco Del Valle Pessego Lata 290ml','Bebidas',6.00,'Lata 290ml.','🥤'],
+['Água Mineral Crystal 500ml','Bebidas',4.00,'Garrafa 500ml.','💧'],
+['Água Mineral Crystal Unidade','Bebidas',5.00,'Unidade.','💧'],
+['Refrigerante Coca-Cola sem Açúcar 220 Ml','Bebidas',6.00,'Lata 220ml.','🥤'],
+['Mini Garrafa De Coca-Cola','Bebidas',6.00,'Mini garrafa Coca-Cola.','🥤']
+].map((p,i)=>({id:i+1,name:p[0],category:p[1],price:p[2],desc:p[3],emoji:p[4],available:true}));
+
+function renderCats(){
+ const cats=['Todos',...new Set(products.map(p=>p.category))];
+ document.getElementById('cats').innerHTML=cats.map(c=>`<button class="pill cat ${cat==c?'active':''}" onclick="cat='${c}';renderProducts();renderCats()">${c}</button>`).join('');
+}
+function renderProducts(){
+ const q=document.getElementById('q').value.toLowerCase();
+ const list=products.filter(p=>(cat=='Todos'||p.category==cat)&&(p.name+p.desc+p.category).toLowerCase().includes(q));
+ document.getElementById('products').innerHTML=list.map(p=>`<div class="card"><div class="photo">${p.emoji}</div><div class="tag">${p.category}</div><h3>${p.name}</h3><div class="desc">${p.desc}</div><div class="row"><div class="price">${money(p.price)}</div><button class="btn" ${!storeOpen||!p.available?'disabled':''} onclick="add(${p.id})">Adicionar</button></div></div>`).join('');
+}
+function add(id){const p=products.find(x=>x.id==id);cart.push({...p,qty:1});renderCart()}
+function renderCart(){
+ const sub=cart.reduce((s,i)=>s+i.price*i.qty,0); const disc=document.getElementById('cupom')?.value.toUpperCase()=='MP10'?sub*.1:0; const taxa=delivery=='Entrega'?deliveryFee:0; const total=sub-disc+taxa;
+ document.getElementById('entrega').className='btn '+(delivery=='Entrega'?'':'gray'); document.getElementById('retirada').className='btn '+(delivery=='Retirada'?'':'gray');
+ document.getElementById('cart').innerHTML=cart.length?cart.map((i,idx)=>`<div class="item"><div class="row"><b>${i.qty}x ${i.name}</b><span>${money(i.price*i.qty)}</span></div><button class="pill" onclick="cart.splice(${idx},1);renderCart()">remover</button></div>`).join(''):'<p class="small">Carrinho vazio.</p>';
+ document.getElementById('totals').innerHTML=`<div class="row"><span>Subtotal</span><b>${money(sub)}</b></div><div class="row"><span>Desconto</span><b>${money(disc)}</b></div><div class="row"><span>Taxa</span><b>${money(taxa)}</b></div><div class="row" style="font-size:20px"><span>Total</span><b>${money(total)}</b></div><div class="small">PIX CPF: 15978014612</div>`;
+ document.getElementById('finish').disabled=!storeOpen||!cart.length||sub<15;
+}
+function finishOrder(){
+ const sub=cart.reduce((s,i)=>s+i.price*i.qty,0); const disc=document.getElementById('cupom').value.toUpperCase()=='MP10'?sub*.1:0; const taxa=delivery=='Entrega'?deliveryFee:0; const total=sub-disc+taxa;
+ const itens=cart.map(i=>`${i.qty}x ${i.name}`).join(', ');
+ orders.unshift({id:String(orders.length+1).padStart(3,'0'),cliente:document.getElementById('nome').value||'Cliente',itens,total,pagamento:document.getElementById('pagamento').value,status:'Recebido',tipo:delivery});
+ const msg=encodeURIComponent(`Olá, quero fazer um pedido na MP Delícias:\n\n${itens}\n\nTotal: ${money(total)}\nPagamento: ${document.getElementById('pagamento').value}\nPIX CPF: 15978014612`);
+ window.open(`https://wa.me/553487196724?text=${msg}`,'_blank'); cart=[]; renderCart(); renderAdmin();
+}
+function toggleAdmin(){document.getElementById('admin').style.display=document.getElementById('admin').style.display=='none'?'block':'none';renderAdmin()}
+function setOpen(v){storeOpen=v;document.getElementById('status').className='status '+(v?'open':'closed');document.getElementById('status').innerText=v?'Loja aberta':'Loja fechada';document.getElementById('closedMsg').style.display=v?'none':'block';renderProducts();renderCart()}
+function renderAdmin(){
+ let el=document.getElementById('adminContent'); if(!el)return;
+ if(tab=='pedidos') el.innerHTML=`<h3>Pedidos</h3><table class="table"><tr><th>Nº</th><th>Cliente</th><th>Itens</th><th>Total</th><th>Status</th></tr>${orders.map(o=>`<tr><td>#${o.id}</td><td>${o.cliente}</td><td>${o.itens}</td><td>${money(o.total)}</td><td><select onchange="o=this.value"><option>${o.status}</option><option>Recebido</option><option>Preparando</option><option>Saiu para entrega</option><option>Entregue</option><option>Cancelado</option></select></td></tr>`).join('')}</table>`;
+ if(tab=='produtos') el.innerHTML=`<h3>Produtos</h3><table class="table"><tr><th>Produto</th><th>Preço</th><th>Status</th></tr>${products.map(p=>`<tr><td>${p.emoji} ${p.name}<div class="small">${p.category}</div></td><td><input value="${p.price}" style="width:90px" onchange="p=products.find(x=>x.id==${p.id});p.price=Number(this.value);renderProducts()"></td><td><button class="pill" onclick="p=products.find(x=>x.id==${p.id});p.available=!p.available;renderAdmin();renderProducts()">${p.available?'Ativo':'Pausado'}</button></td></tr>`).join('')}</table>`;
+ if(tab=='loja') el.innerHTML=`<div class="two"><button class="btn dark" onclick="setOpen(false)">Fechar loja</button><button class="btn green" onclick="setOpen(true)">Abrir loja</button><button class="btn" onclick="deliveryFee=0;renderCart();renderAdmin()">Entrega grátis</button><button class="btn" onclick="deliveryFee=10;renderCart();renderAdmin()">Taxa R$10</button></div><p><b>Taxa atual:</b> ${deliveryFee==0?'Grátis':money(deliveryFee)}</p><p><b>Domínio:</b> pedidompdelicias.com.br</p>`;
+ if(tab=='financeiro'){let total=orders.filter(o=>o.status!='Cancelado').reduce((s,o)=>s+o.total,0);el.innerHTML=`<h3>Fechamento do dia</h3><p>Total vendido: <b>${money(total)}</b></p><p>Pedidos: <b>${orders.length}</b></p><label>Gastos do dia</label><input class="field" type="number" value="${expense}" onchange="expense=Number(this.value);renderAdmin()"><p>Lucro estimado: <b>${money(total-expense)}</b></p><button class="btn" onclick="reports.unshift({data:new Date().toLocaleDateString(),total:${total},lucro:${total}-expense});setOpen(false);renderAdmin()">Fazer fechamento e fechar loja</button><h3>Histórico</h3>${reports.map(r=>`<p>${r.data} - Vendas: ${money(r.total)} - Lucro: ${money(r.lucro)}</p>`).join('')}`;}
+}
+renderCats();renderProducts();renderCart();
+</script>
+</body>
+</html>

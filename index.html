@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MP Delícias - Cliente V4</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
+<title>MP Delícias - Cliente V5</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#fff1f5;color:#222}
 header{position:sticky;top:0;background:#fff;border-bottom:1px solid #ffd3df;z-index:9}
 .top{max-width:1200px;margin:auto;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -43,14 +43,33 @@ const raw=[
 ];
 const products=raw.map((p,i)=>({id:i+1,name:p[0],category:p[1],price:p[2],desc:p[3],emoji:p[4]}));
 
+
+async function carregarProdutosBanco(){
+ const {data,error}=await db.from('produtos').select('*').order('id',{ascending:true});
+ if(error){ console.log('Usando produtos internos', error); return; }
+ if(data && data.length>0){
+   products.length=0;
+   data.forEach(p=>{
+     products.push({
+       id:p.id,
+       name:p.nome,
+       category:p.categoria || 'Outros',
+       price:Number(p.preco || 0),
+       desc:p.descricao || '',
+       emoji:p.emoji || '🍽️',
+       ativo:p.ativo !== false
+     });
+   });
+ }
+}
 function renderCats(){const cats=['Todos',...new Set(products.map(p=>p.category))];document.getElementById('cats').innerHTML=cats.map(c=>`<button class="btn cat ${cat==c?'active':''}" onclick="cat='${c}';renderProducts();renderCats()">${c}</button>`).join('')}
-function renderProducts(){const q=document.getElementById('q').value.toLowerCase();const list=products.filter(p=>(cat=='Todos'||p.category==cat)&&(p.name+p.desc+p.category).toLowerCase().includes(q));document.getElementById('products').innerHTML=list.map(p=>`<div class="card"><div class="photo">${p.emoji}</div><div class="tag">${p.category}</div><h3>${p.name}</h3><div class="desc">${p.desc}</div><div class="row"><div class="price">${money(p.price)}</div><button class="btn" ${!storeOpen?'disabled':''} onclick="add(${p.id})">Adicionar</button></div></div>`).join('')}
+function renderProducts(){const q=document.getElementById('q').value.toLowerCase();const list=products.filter(p=>(p.ativo!==false)&&(cat=='Todos'||p.category==cat)&&(p.name+p.desc+p.category).toLowerCase().includes(q));document.getElementById('products').innerHTML=list.map(p=>`<div class="card"><div class="photo">${p.emoji}</div><div class="tag">${p.category}</div><h3>${p.name}</h3><div class="desc">${p.desc}</div><div class="row"><div class="price">${money(p.price)}</div><button class="btn" ${!storeOpen?'disabled':''} onclick="add(${p.id})">Adicionar</button></div></div>`).join('')}
 function add(id){const p=products.find(x=>x.id==id),e=cart.find(x=>x.id==id);e?e.qty++:cart.push({...p,qty:1});renderCart()}
 function renderCart(){const sub=cart.reduce((s,i)=>s+i.price*i.qty,0),disc=document.getElementById('cupom')?.value.toUpperCase()=='MP10'?sub*.1:0,taxa=delivery=='Entrega'?deliveryFee:0,total=sub-disc+taxa;document.getElementById('entrega').className='btn '+(delivery=='Entrega'?'':'gray');document.getElementById('retirada').className='btn '+(delivery=='Retirada'?'':'gray');document.getElementById('cart').innerHTML=cart.length?cart.map((i,idx)=>`<div class="item"><div class="row"><b>${i.qty}x ${i.name}</b><span>${money(i.price*i.qty)}</span></div><div class="row"><button class="btn gray" onclick="cart[${idx}].qty++;renderCart()">+</button><button class="btn gray" onclick="cart[${idx}].qty--;if(cart[${idx}].qty<=0)cart.splice(${idx},1);renderCart()">-</button></div></div>`).join(''):'<p class="small">Carrinho vazio.</p>';document.getElementById('totals').innerHTML=`<div class="row"><span>Subtotal</span><b>${money(sub)}</b></div><div class="row"><span>Desconto</span><b>${money(disc)}</b></div><div class="row"><span>Taxa</span><b>${money(taxa)}</b></div><div class="row" style="font-size:20px"><span>Total</span><b>${money(total)}</b></div><div class="small">PIX CPF: ${PIX}</div>`;document.getElementById('finish').disabled=!storeOpen||!cart.length||sub<15}
 async function finishOrder(){const sub=cart.reduce((s,i)=>s+i.price*i.qty,0),disc=document.getElementById('cupom').value.toUpperCase()=='MP10'?sub*.1:0,taxa=delivery=='Entrega'?deliveryFee:0,total=sub-disc+taxa,itens=cart.map(i=>`${i.qty}x ${i.name}`).join(', ');const pedido={cliente:document.getElementById('nome').value||'Cliente',telefone:document.getElementById('fone').value||'',endereco:delivery=='Entrega'?(document.getElementById('endereco').value||''):'Retirada na loja',itens:itens+(document.getElementById('obs').value?' | Obs: '+document.getElementById('obs').value:''),pagamento:document.getElementById('pagamento').value,total,status:'Recebido'};const {data,error}=await db.from('pedidos').insert([pedido]).select().single();if(error){alert('Erro ao salvar: '+error.message);return}localStorage.setItem('ultimoPedidoMP',data.id);mostrarStatusCliente(data.id,'Recebido');const msg=encodeURIComponent(`Olá, quero fazer um pedido na MP Delícias:\n\n${itens}\n\nPedido: #${data.id}\nCliente: ${pedido.cliente}\nTipo: ${delivery}\nEndereço: ${pedido.endereco}\nPagamento: ${pedido.pagamento}\nTotal: ${money(total)}\nPIX CPF: ${PIX}`);window.open(`https://wa.me/${WHATSAPP}?text=${msg}`,'_blank');alert('Pedido salvo! Pedido #'+data.id);cart=[];renderCart()}
 function textoStatus(s){return s=='Recebido'?'📥 Pedido recebido':s=='Preparando'?'👨‍🍳 Seu pedido está sendo preparado':s=='Saiu para entrega'?'🛵 Seu pedido saiu para entrega':s=='Entregue'?'✅ Pedido entregue':s=='Cancelado'?'❌ Pedido cancelado':s||'📥 Pedido recebido'}
 function mostrarStatusCliente(id,status){document.getElementById('rastreamento').style.display='block';document.getElementById('pedidoNumero').innerText='Pedido #'+id;document.getElementById('pedidoStatus').innerText=textoStatus(status)}
 async function carregarStatusCliente(){const id=localStorage.getItem('ultimoPedidoMP');if(!id)return;const {data,error}=await db.from('pedidos').select('id,status').eq('id',id).single();if(!error&&data)mostrarStatusCliente(data.id,data.status)}
-renderCats();renderProducts();renderCart();carregarStatusCliente();setInterval(carregarStatusCliente,7000);
+async function iniciarCliente(){await carregarProdutosBanco();renderCats();renderProducts();renderCart();carregarStatusCliente();setInterval(carregarStatusCliente,7000);} iniciarCliente();
 </script><a class="whatsappFloat" href="https://wa.me/553487196724" target="_blank">💬 WhatsApp</a>
 </body></html>

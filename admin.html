@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MP Delícias - Admin V4</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
+<title>MP Delícias - Admin V5</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#fff1f5;color:#222}
 header{position:sticky;top:0;background:#fff;border-bottom:1px solid #ffd3df;z-index:9}
 .top{max-width:1200px;margin:auto;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -60,7 +60,93 @@ function setOpen(v){storeOpen=v;document.getElementById('storeStatus').className
 async function closeDay(){const valid=orders.filter(o=>o.status!='Cancelado'),total=valid.reduce((s,o)=>s+Number(o.total||0),0),lucro=total-Number(expense||0),hoje=new Date().toISOString().slice(0,10);const {error}=await db.from('fechamento').insert([{data_fechamento:hoje,total_vendas:total,gastos:Number(expense||0),lucro}]);if(error){alert('Erro ao fechar: '+error.message);return}setOpen(false);alert('Fechamento salvo e loja fechada!')}
 function imprimirPedido(id){const o=orders.find(x=>String(x.id)===String(id));if(!o)return;const area=document.getElementById('printArea');area.style.display='block';area.innerHTML=`<h1>MP Delícias</h1><h2>Pedido #${o.id}</h2><p><b>Cliente:</b> ${o.cliente||''}</p><p><b>Telefone:</b> ${o.telefone||''}</p><p><b>Endereço:</b> ${o.endereco||''}</p><hr><p><b>Itens:</b><br>${o.itens||''}</p><p><b>Pagamento:</b> ${o.pagamento||''}</p><p><b>Total:</b> ${money(o.total)}</p><p><b>Status:</b> ${o.status||''}</p>`;window.print();setTimeout(()=>area.style.display='none',500)}
 function reciboCliente(id){const o=orders.find(x=>String(x.id)===String(id));if(!o)return;const texto=`🧾 RECIBO MP DELÍCIAS%0A%0APedido: #${o.id}%0ACliente: ${o.cliente||''}%0AItens: ${o.itens||''}%0APagamento: ${o.pagamento||''}%0ATotal: ${money(o.total)}%0AStatus: ${o.status||''}%0A%0AObrigado pela preferência!`;window.open(`https://wa.me/${WHATSAPP}?text=${texto}`,'_blank')}
+
+let produtosBanco=[];
+async function carregarProdutosAdminBanco(){
+ const {data,error}=await db.from('produtos').select('*').order('id',{ascending:true});
+ if(error){console.log(error);return}
+ produtosBanco=data||[];
+}
+async function alternarProdutoBanco(id,ativoAtual){
+ const {error}=await db.from('produtos').update({ativo:!ativoAtual}).eq('id',id);
+ if(error){alert('Erro ao alterar produto: '+error.message);return}
+ await carregarProdutosAdminBanco(); renderAdmin();
+}
+async function salvarProdutoBanco(id,campo,valor){
+ let obj={}; obj[campo]=(campo==='preco')?Number(valor||0):valor;
+ const {error}=await db.from('produtos').update(obj).eq('id',id);
+ if(error){alert('Erro ao salvar produto: '+error.message);return}
+}
+async function novoProdutoBanco(){
+ const nome=document.getElementById('novoNome').value;
+ const categoria=document.getElementById('novoCategoria').value;
+ const preco=Number(document.getElementById('novoPreco').value||0);
+ const descricao=document.getElementById('novoDescricao').value;
+ const emoji=document.getElementById('novoEmoji').value || '🍽️';
+ if(!nome || !categoria || !preco){alert('Preencha nome, categoria e preço');return}
+ const {error}=await db.from('produtos').insert([{nome,categoria,preco,descricao,emoji,ativo:true}]);
+ if(error){alert('Erro ao cadastrar: '+error.message);return}
+ await carregarProdutosAdminBanco(); renderAdmin();
+}
+async function importarCardapioInicial(){
+ const base=[
+ ['Nosso Mexido Da Casa','Mexidão',29.90,'Mexido da casa. Serve 2 pessoas','🍛'],
+ ['Combo Dupla Mexidão + Coca 1l','Mexidão',62.90,'2 Mexidões + Coca-Cola 1l','🎁'],
+ ['Combo Mexidão + Coca lata','Mexidão',35.90,'Mexidão + Coca-Cola 310ml','🎁'],
+ ['Coxinha frango com Catupiry','Salgados',10.90,'Coxinha fresquinha com Catupiry','🥟'],
+ ['Kibe de carne','Salgados',11.00,'Kibe de carne temperada','🥟'],
+ ['Combo Salgado da Casa','Salgados',54.90,'3 salgados + Coca-Cola 1l','🎁'],
+ ['Salgado Hambúrguer','Salgados',10.90,'Hambúrguer e queijo','🍔'],
+ ['Combo Dupla Crocante + Coca 1l','Salgados',26.90,'2 coxinhas + Coca 1l','🎁'],
+ ['Sanduiche Natural','Sanduiche',20.90,'Sanduíche natural de frango','🥪'],
+ ['Tapioca De Frango Especial','Tapiocas',29.90,'Frango, muçarela e tomate','🥙'],
+ ['Tapioca De Frango Premium','Tapiocas',29.90,'Frango, muçarela e cream cheese','🥙'],
+ ['Tapioca De Frango Tradicional','Tapiocas',29.90,'Frango temperado e muçarela','🥙'],
+ ['Tapioca Mista','Tapiocas',29.90,'Presunto, muçarela e tomate','🥙'],
+ ['Tapioca De Ovo Cremosa','Tapiocas',29.90,'Ovo, muçarela e tomate','🥙'],
+ ['Tapioca De Presunto Cremoso','Tapiocas',29.90,'Presunto, muçarela e requeijão','🥙'],
+ ['Ragu de carne G','Macarrões G',34.90,'Molho vermelho, carne e mussarela','🍝'],
+ ['Frango cremoso G','Macarrões G',34.90,'Molho rose, frango e mussarela','🍝'],
+ ['Macarrão a calabresa G','Macarrões G',34.90,'Calabresa, tomate, milho e mussarela','🍝'],
+ ['Especial da casa G','Macarrões G',34.90,'Frango, bacon e mussarela','🍝'],
+ ['Bolonhesa G','Macarrões G',34.90,'Carne bovina, palmito e parmesão','🍝'],
+ ['Misto G','Macarrões G',34.90,'Carne, frango, milho e requeijão','🍝'],
+ ['Ragu de carne P','Macarrões P',26.90,'Molho vermelho, carne e mussarela','🍝'],
+ ['Frango cremoso P','Macarrões P',26.90,'Molho rose, frango e mussarela','🍝'],
+ ['Macarrão a calabresa P','Macarrões P',26.90,'Calabresa, milho e mussarela','🍝'],
+ ['Especial da casa P','Macarrões P',26.90,'Frango, bacon e mussarela','🍝'],
+ ['Bolonhesa P','Macarrões P',26.90,'Carne bovina, palmito e parmesão','🍝'],
+ ['Misto P','Macarrões P',26.90,'Carne, frango e requeijão','🍝'],
+ ['Omelete Misto','Omeletes',25.90,'Ovo, presunto, muçarela e orégano','🍳'],
+ ['Omelete De Frango','Omeletes',25.90,'Frango, muçarela e requeijão','🍳'],
+ ['Omelete Cremoso','Omeletes',25.90,'Requeijão, cheddar e cream cheese','🍳'],
+ ['Omelete Clássico','Omeletes',25.90,'Ovos, sal e cheiro verde','🍳'],
+ ['Omelete Fit','Omeletes',25.90,'Tomate, palmito, cebola e milho','🍳'],
+ ['Omelete De Queijo','Omeletes',25.90,'Muçarela, requeijão e orégano','🍳'],
+ ['Suco Morango 500 ml','Sucos Naturais',19.90,'Suco refrescante de morango','🥤'],
+ ['Suco Maracujá 500 ml','Sucos Naturais',19.90,'Suco de maracujá','🥤'],
+ ['Suco Manga 500ml','Sucos Naturais',19.90,'Suco de manga','🥤'],
+ ['Suco Acerola com Laranja','Sucos Naturais',19.90,'Acerola com laranja','🥤'],
+ ['Vitamina Banana Com Morango 500 ml','Vitaminas',22.90,'Banana com morango','🥛'],
+ ['Vitamina Manga 500 ml','Vitaminas',22.90,'Vitamina de manga','🥛'],
+ ['Vitamina De Maracujá 500 ml','Vitaminas',22.90,'Vitamina de maracujá','🥛'],
+ ['Vitamina Morango 500 ml','Vitaminas',22.90,'Vitamina de morango','🥛'],
+ ['Vitamina de açai 500 ml','Vitaminas',22.90,'Açaí cremoso','🥛'],
+ ['Refrigerante Coca Cola 1l','Bebidas',11.99,'Coca-Cola 1 litro','🥤'],
+ ['Fanta Uva 220ml','Bebidas',6.00,'Lata 220ml','🥤'],
+ ['Fanta Laranja Mini Lata 220ml','Bebidas',6.00,'Lata 220ml','🥤'],
+ ['Coca - Cola Lata 350 Ml','Bebidas',8.00,'Lata unidade','🥤'],
+ ['Suco Del Valle Uva 250ml','Bebidas',6.00,'Embalagem 250ml','🥤'],
+ ['Água Mineral Crystal 500ml','Bebidas',4.00,'Garrafa 500ml','💧'],
+ ['Mini Garrafa De Coca-Cola','Bebidas',6.00,'Mini garrafa','🥤']
+ ];
+ const {error}=await db.from('produtos').insert(base.map(p=>({nome:p[0],categoria:p[1],preco:p[2],descricao:p[3],emoji:p[4],ativo:true})));
+ if(error){alert('Erro ao importar. Talvez já tenha produtos cadastrados. '+error.message);return}
+ await carregarProdutosAdminBanco(); renderAdmin(); alert('Cardápio importado!');
+}
+
 function renderAdmin(){const el=document.getElementById('adminContent');if(!el||!adminLogado)return;const valid=orders.filter(o=>o.status!='Cancelado'),total=valid.reduce((s,o)=>s+Number(o.total||0),0),pix=valid.filter(o=>o.pagamento=='PIX').reduce((s,o)=>s+Number(o.total||0),0),dinheiro=valid.filter(o=>o.pagamento=='Dinheiro').reduce((s,o)=>s+Number(o.total||0),0),cartao=valid.filter(o=>o.pagamento=='Cartão').reduce((s,o)=>s+Number(o.total||0),0);if(tab=='pedidos')el.innerHTML=`<div class="adminControls"><button class="btn green" onclick="loadOrders()">Atualizar pedidos</button><button class="btn" onclick="alternarSom()">Som: ${somAtivo?'Ligado':'Desligado'}</button><button class="btn gray" onclick="window.open('./','_blank')">Ver site cliente</button></div><div class="cards"><div class="metric">Pedidos<br><b>${orders.length}</b></div><div class="metric">Vendas<br><b>${money(total)}</b></div><div class="metric">Recebidos<br><b>${orders.filter(o=>o.status=='Recebido').length}</b></div><div class="metric">Preparando<br><b>${orders.filter(o=>o.status=='Preparando').length}</b></div></div><table class="table"><tr><th>Nº</th><th>Cliente</th><th>Itens</th><th>Total</th><th>Pagamento</th><th>Status</th><th>Ações</th></tr>${orders.map(o=>`<tr><td>#${o.id}</td><td>${o.cliente||''}<div class="small">${o.telefone||''}<br>${o.endereco||''}</div></td><td>${o.itens||''}</td><td>${money(o.total)}</td><td>${o.pagamento||''}</td><td><select onchange="updateOrderStatus(${o.id},this.value)"><option ${o.status=='Recebido'?'selected':''}>Recebido</option><option ${o.status=='Preparando'?'selected':''}>Preparando</option><option ${o.status=='Saiu para entrega'?'selected':''}>Saiu para entrega</option><option ${o.status=='Entregue'?'selected':''}>Entregue</option><option ${o.status=='Cancelado'?'selected':''}>Cancelado</option></select></td><td><button class="btn gray" onclick="imprimirPedido(${o.id})">Imprimir</button><br><button class="btn green" onclick="reciboCliente(${o.id})">Recibo</button></td></tr>`).join('')}</table>`;if(tab=='loja')el.innerHTML=`<div class="cards"><button class="btn green" onclick="setOpen(true)">Abrir loja</button><button class="btn red" onclick="setOpen(false)">Fechar loja</button><button class="btn" onclick="deliveryFee=0;renderAdmin()">Entrega grátis</button><button class="btn" onclick="deliveryFee=10;renderAdmin()">Taxa R$10</button></div><p><b>Taxa atual:</b> ${deliveryFee==0?'Grátis':money(deliveryFee)}</p><label>Tempo estimado para informar ao cliente</label><input class="field" value="${tempoEstimado}" onchange="tempoEstimado=this.value"><p><b>WhatsApp:</b> +55 34 8719-6724</p><p><b>PIX:</b> ${PIX}</p>`;if(tab=='produtos')el.innerHTML=`<h3>📦 Produtos indisponíveis</h3><p class="small">Controle inicial local. Na próxima versão ligamos isso ao banco para refletir no site do cliente automaticamente.</p><table class="table"><tr><th>Produto/Categoria</th><th>Status</th><th>Ação</th></tr>${produtosAdmin.map(p=>`<tr><td>${p}</td><td>${produtosPausados.includes(p)?'<span class="badge">Pausado</span>':'<span class="badge">Ativo</span>'}</td><td><button class="btn ${produtosPausados.includes(p)?'green':'red'}" onclick="alternarProduto('${p}')">${produtosPausados.includes(p)?'Ativar':'Pausar'}</button></td></tr>`).join('')}</table>`;
+if(tab=='produtos')el.innerHTML=`<h3>📦 Produtos do cardápio</h3><p class="small">Pausar produto por produto. Quando pausar, ele some do site do cliente.</p><div class="adminControls"><button class="btn green" onclick="carregarProdutosAdminBanco().then(renderAdmin)">Atualizar produtos</button><button class="btn" onclick="importarCardapioInicial()">Importar cardápio inicial</button></div><div class="box" style="margin:10px 0"><h3>Novo produto</h3><input id="novoNome" class="field" placeholder="Nome"><input id="novoCategoria" class="field" placeholder="Categoria"><input id="novoPreco" class="field" type="number" placeholder="Preço"><input id="novoEmoji" class="field" placeholder="Emoji ex: 🍝"><textarea id="novoDescricao" class="field" placeholder="Descrição"></textarea><button class="btn green" onclick="novoProdutoBanco()">Cadastrar produto</button></div><table class="table"><tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Descrição</th><th>Status</th><th>Ação</th></tr>${produtosBanco.map(p=>`<tr><td><input class="field" value="${p.nome||''}" onchange="salvarProdutoBanco(${p.id},'nome',this.value)"></td><td><input class="field" value="${p.categoria||''}" onchange="salvarProdutoBanco(${p.id},'categoria',this.value)"></td><td><input class="field" type="number" value="${p.preco||0}" onchange="salvarProdutoBanco(${p.id},'preco',this.value)"></td><td><textarea class="field" onchange="salvarProdutoBanco(${p.id},'descricao',this.value)">${p.descricao||''}</textarea></td><td>${p.ativo?'<span class="badge">Ativo</span>':'<span class="badge">Pausado</span>'}</td><td><button class="btn ${p.ativo?'red':'green'}" onclick="alternarProdutoBanco(${p.id},${p.ativo})">${p.ativo?'Pausar':'Ativar'}</button></td></tr>`).join('')}</table>`;
 if(tab=='financeiro')el.innerHTML=`<div class="cards"><div class="metric">Total<br><b>${money(total)}</b></div><div class="metric">PIX<br><b>${money(pix)}</b></div><div class="metric">Dinheiro<br><b>${money(dinheiro)}</b></div><div class="metric">Cartão<br><b>${money(cartao)}</b></div></div><label>Gastos do dia</label><input class="field" type="number" value="${expense}" onchange="expense=Number(this.value);renderAdmin()"><h3>Lucro estimado: ${money(total-expense)}</h3><button class="btn green" onclick="closeDay()">Fechar dia e salvar</button>`}
 setInterval(()=>{if(adminLogado)loadOrders()},15000);
 </script></body></html>

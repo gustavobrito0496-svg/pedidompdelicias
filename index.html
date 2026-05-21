@@ -175,5 +175,43 @@ function renderAdmin(){
 }
 renderCats();renderProducts();renderCart();
 </script>
-</body>
+</body><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseUrl = "https://kmhhvlvkaewinhfswdzy.supabase.co"
+
+const supabaseKey =
+"sb_publishable_txROyphFSAhwp9us31hYxw_ufylL0in"
+
+const supabase = window.supabase.createClient(
+supabaseUrl,
+supabaseKey
+)
+
+async function salvarPedido() {
+
+const pedido = {
+cliente: "Teste MP Delícias",
+telefone: "000000000",
+endereco: "Teste",
+itens: "Pedido teste",
+pagamento: "PIX",
+total: 0
+}
+
+const { data, error } =
+await supabase
+.from("pedidos")
+.insert([pedido])
+
+if(error){
+console.log(error)
+alert("Erro ao salvar")
+return
+}
+
+alert("Pedido salvo no banco")
+}
+
+</script>
 </html>

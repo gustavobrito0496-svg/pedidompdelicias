@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MP Delícias - Admin V9 Fechamento</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
+<title>MP Delícias - Admin V10 Login Real</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#fff1f5;color:#222}
 header{position:sticky;top:0;background:#fff;border-bottom:1px solid #ffd3df;z-index:9}
 .top{max-width:1200px;margin:auto;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -24,7 +24,16 @@ aside{position:sticky;top:85px;height:max-content}.small{font-size:13px;color:#6
 </style></head>
 <body>
 <header><div class="top"><div class="brand"><div class="logo">MP</div><div><b style="font-size:22px">Painel MP Delícias</b><div class="small">Área administrativa</div></div></div><span id="storeStatus" class="status open">Admin</span></div></header><div id="avisoPedidoNovo" style="display:none;background:#16a34a;color:white;text-align:center;padding:12px;font-weight:900">🔔 Novo pedido recebido!</div>
-<section id="loginAdmin" class="admin"><div class="box"><h2>🔐 Entrar no painel</h2><input id="adminSenha" class="field" type="password" placeholder="Senha do admin"><button class="btn dark" onclick="entrarAdmin()">Entrar</button><p class="small">Senha inicial: <b>mp123</b> — depois vamos trocar por senha forte</p></div></section>
+<section id="loginAdmin" class="admin">
+  <div class="box">
+    <h2>🔐 Entrar no painel MP Delícias</h2>
+    <p class="small">Use o email e senha cadastrados no Supabase.</p>
+    <input id="adminEmail" class="field" type="email" placeholder="Email do admin">
+    <input id="adminSenha" class="field" type="password" placeholder="Senha">
+    <button class="btn dark" onclick="entrarAdmin()">Entrar</button>
+    <p class="small">Acesso protegido por login real.</p>
+  </div>
+</section>
 <section id="admin" class="admin" style="display:none"><div class="box"><h2>🔐 Painel administrador MP Delícias</h2><div class="tabs"><button class="btn dark" onclick="tab='pedidos';renderAdmin()">Pedidos</button><button class="btn dark" onclick="tab='loja';renderAdmin()">Loja</button><button class="btn dark" onclick="tab='financeiro';renderAdmin()">Fechamento</button><button class="btn dark" onclick="tab='produtos';renderAdmin()">Produtos</button><button class="btn dark" onclick="tab='visual';renderAdmin()">Visual</button><button class="btn dark" onclick="tab='relatorios';renderAdmin()">Relatórios</button><button class="btn red" onclick="sairAdmin()">Sair</button></div><div id="adminContent"></div></div></section><div id="printArea"></div>
 <script>
 const db=window.supabase.createClient("https://kmhhvlvkaewinhfswdzy.supabase.co","sb_publishable_txROyphFSAhwp9us31hYxw_ufylL0in");
@@ -38,8 +47,45 @@ function alternarProduto(nome){
  localStorage.setItem('produtosPausadosMP',JSON.stringify(produtosPausados));
  renderAdmin();
 }
-function entrarAdmin(){if(document.getElementById('adminSenha').value==='mp123'){adminLogado=true;document.getElementById('loginAdmin').style.display='none';document.getElementById('admin').style.display='block';loadOrders();carregarFechamentos();}else alert('Senha incorreta')}
-function sairAdmin(){adminLogado=false;document.getElementById('admin').style.display='none';document.getElementById('loginAdmin').style.display='block'}
+
+async function verificarSessaoAdmin(){
+ const {data}=await db.auth.getSession();
+ if(data && data.session){
+   adminLogado=true;
+   document.getElementById('loginAdmin').style.display='none';
+   document.getElementById('admin').style.display='block';
+   await loadOrders();
+   if(typeof carregarProdutosAdminBanco==='function') await carregarProdutosAdminBanco();
+   if(typeof carregarConfigAdmin==='function') await carregarConfigAdmin();
+   renderAdmin();
+ }else{
+   adminLogado=false;
+   document.getElementById('loginAdmin').style.display='block';
+   document.getElementById('admin').style.display='none';
+ }
+}
+async function entrarAdmin(){
+ const email=document.getElementById('adminEmail').value.trim();
+ const senha=document.getElementById('adminSenha').value;
+ if(!email || !senha){alert('Informe email e senha');return}
+ const {data,error}=await db.auth.signInWithPassword({email,password:senha});
+ if(error){alert('Erro no login: '+error.message);return}
+ adminLogado=true;
+ document.getElementById('loginAdmin').style.display='none';
+ document.getElementById('admin').style.display='block';
+ await loadOrders();
+ if(typeof carregarProdutosAdminBanco==='function') await carregarProdutosAdminBanco();
+ if(typeof carregarConfigAdmin==='function') await carregarConfigAdmin();
+ renderAdmin();
+}
+async function sairAdmin(){
+ await db.auth.signOut();
+ adminLogado=false;
+ document.getElementById('admin').style.display='none';
+ document.getElementById('loginAdmin').style.display='block';
+ alert('Você saiu do painel');
+}
+
 function tocarSomPedido(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)(),osc=ctx.createOscillator(),gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=880;gain.gain.value=.12;osc.start();setTimeout(()=>{osc.stop();ctx.close()},350)}catch(e){}}
 function verificarPedidoNovo(){
  if(orders.length>ultimoTotalPedidos&&ultimoTotalPedidos>0){
@@ -260,5 +306,6 @@ if(tab=='produtos')el.innerHTML=`<h3>📦 Produtos do cardápio</h3><p class="sm
 if(tab=='relatorios')el.innerHTML=`<h3>📊 Relatórios</h3><div class="cards"><div class="metric">Pedidos do dia<br><b>${listaDia.length}</b></div><div class="metric">Ticket médio<br><b>${money(total/Math.max(1,valid.length))}</b></div><div class="metric">Entregues<br><b>${orders.filter(o=>o.status=='Entregue').length}</b></div><div class="metric">Cancelados<br><b>${orders.filter(o=>o.status=='Cancelado').length}</b></div></div><div class="box"><h3>Status dos pedidos</h3><p>${resumoStatus()}</p><button class="btn green" onclick="exportarPedidosCSV()">Exportar CSV</button><button class="btn gray" onclick="window.print()">Imprimir relatório</button></div>`;
 if(tab=='visual')el.innerHTML=`<h3>🖼 Visual da loja</h3><p class="small">Coloque link de imagem para banner. As fotos dos produtos agora podem ser enviadas direto na aba Produtos.</p><label>Link do banner principal</label><input id="cfgBanner" class="field" value="${configLoja?.banner||''}" placeholder="https://..."><label>Texto da promoção/frase principal</label><textarea id="cfgPromocao" class="field" placeholder="Ex: Sua fome merece MP Delícias">${configLoja?.promocao_dia||''}</textarea><button class="btn green" onclick="salvarConfigAdmin()">Salvar visual</button>${configLoja?.banner?`<h3>Prévia</h3><img src="${configLoja.banner}" style="max-width:100%;border-radius:18px">`:''}`;
 if(tab=='financeiro')el.innerHTML=`<div class="cards"><div class="metric">Total<br><b>${money(total)}</b></div><div class="metric">PIX<br><b>${money(pix)}</b></div><div class="metric">Dinheiro<br><b>${money(dinheiro)}</b></div><div class="metric">Cartão<br><b>${money(cartao)}</b></div></div><label>Gastos do dia</label><input class="field" type="number" value="${expense}" onchange="expense=Number(this.value);renderAdmin()"><h3>Lucro estimado: ${money(total-expense)}</h3><p class="small">Ao encerrar o dia, o resumo atual zera e fica salvo no histórico.</p><button class="btn green" onclick="encerrarDia()">Encerrar dia e reiniciar</button><h3>Histórico de fechamentos</h3><table class="table"><tr><th>Data</th><th>Pedidos</th><th>Total</th><th>PIX</th><th>Cartão</th><th>Dinheiro</th><th>Gastos</th><th>Lucro</th></tr>${fechamentos.map(f=>`<tr><td>${f.data_fechamento||''}</td><td>${f.total_pedidos||0}</td><td>${money(f.total_vendas)}</td><td>${money(f.total_pix)}</td><td>${money(f.total_cartao)}</td><td>${money(f.total_dinheiro)}</td><td>${money(f.gastos)}</td><td>${money(f.lucro)}</td></tr>`).join('')}</table>`}
-setInterval(()=>{if(adminLogado)loadOrders()},15000);
+setInterval(()=>{if(adminLogado)loadOrders()},10000);
+verificarSessaoAdmin();
 </script></body></html>

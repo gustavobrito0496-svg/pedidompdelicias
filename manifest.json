@@ -1,0 +1,18 @@
+{
+  "name": "MP Delícias - Pedidos",
+  "short_name": "MP Delícias",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fff1f5",
+  "theme_color": "#e91e63",
+  "description": "Sistema de pedidos online da MP Delícias",
+  "icons": [
+    {
+      "src": "bannermp.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

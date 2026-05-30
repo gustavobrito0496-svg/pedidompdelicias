@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MP Delícias - Cliente V16 Mercado Pago</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
+<title>MP Delícias - Cliente V16 Mercado Pago Corrigido</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#fff1f5;color:#222}
 header{position:sticky;top:0;background:#fff;border-bottom:1px solid #ffd3df;z-index:9}
 .top{max-width:1200px;margin:auto;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -67,7 +67,7 @@ input,textarea,select,button{max-width:100%}
 <body id="topo">
 <header><div class="top"><div class="brand"><div class="logo">MP</div><div><b style="font-size:22px">MP Delícias</b><div class="small">Pedido online • Araxá/MG</div></div></div><span id="storeStatus" class="status open">Loja aberta</span></div></header>
 <div class="wrap"><main><img src="bannermp.jpg" class="banner" onerror="this.style.display='none'"><section class="hero"><h1>Peça sua delícia sem sair de casa</h1><p>Mexidão, salgados, tapiocas, macarrões, omeletes, sucos, vitaminas e bebidas.</p><b>PIX CPF: 15978014612 • WhatsApp: +55 34 8719-6724</b></section><div id="closedMsg" class="notice">Loja fechada no momento. Voltamos amanhã às 10:30.</div><input id="q" placeholder="Buscar produto..." oninput="renderProducts()"><div id="cats" class="cats"></div><section id="products" class="grid"></section></main>
-<aside><div class="box"><h2>🛒 Carrinho</h2><div id="cart"></div><div class="row"><button id="entrega" class="btn" onclick="delivery='Entrega';renderCart()">Entrega</button><button id="retirada" class="btn gray" onclick="delivery='Retirada';renderCart()">Retirada</button></div><input id="nome" class="field" placeholder="Nome do cliente"><input id="fone" class="field" placeholder="Telefone"><input id="endereco" class="field" placeholder="Endereço completo"><textarea id="obs" class="field" placeholder="Observação geral"></textarea><select id="pagamento"><option>PIX</option><option>Dinheiro</option><option>Cartão</option><option>Mercado Pago</option></select><input id="cupom" placeholder="Cupom: MP10" oninput="renderCart()"><div id="totals" class="total"></div><button id="finish" class="btn green" style="width:100%;padding:15px;margin-top:10px" onclick="finishOrder()">Finalizar pedido</button><div id="rastreamento" class="total" style="display:none;margin-top:12px"><h3>📦 Acompanhar pedido</h3><p id="pedidoNumero" class="small"></p><div id="pedidoStatus" style="font-size:20px;font-weight:900;margin:10px 0">Recebido</div><div id="pedidoTempo" class="small">Tempo estimado: 30 a 45 minutos</div><div class="small">Atualiza quando a loja muda o status.</div></div></div>
+<aside><div class="box"><h2>🛒 Carrinho</h2><div id="cart"></div><div class="row"><button id="entrega" class="btn" onclick="delivery='Entrega';renderCart()">Entrega</button><button id="retirada" class="btn gray" onclick="delivery='Retirada';renderCart()">Retirada</button></div><input id="nome" class="field" placeholder="Nome do cliente"><input id="fone" class="field" placeholder="Telefone"><input id="endereco" class="field" placeholder="Endereço completo"><textarea id="obs" class="field" placeholder="Observação geral"></textarea><select id="pagamento"><option>PIX</option><option>Dinheiro</option><option>Cartão</option></select><input id="cupom" placeholder="Cupom: MP10" oninput="renderCart()"><div id="totals" class="total"></div><button id="finish" class="btn green" style="width:100%;padding:15px;margin-top:10px" onclick="finishOrder()">Finalizar pedido</button><div id="rastreamento" class="total" style="display:none;margin-top:12px"><h3>📦 Acompanhar pedido</h3><p id="pedidoNumero" class="small"></p><div id="pedidoStatus" style="font-size:20px;font-weight:900;margin:10px 0">Recebido</div><div id="pedidoTempo" class="small">Tempo estimado: 30 a 45 minutos</div><div class="small">Atualiza quando a loja muda o status.</div></div></div>
 <div class="box" style="margin-top:16px">
   <h3>🔎 Consultar pedido</h3>
   <input id="consultaPedidoId" class="field" placeholder="Número do pedido">
@@ -142,39 +142,49 @@ function add(id){const p=products.find(x=>x.id==id),e=cart.find(x=>x.id==id);e?e
 function renderCart(){const sub=cart.reduce((s,i)=>s+i.price*i.qty,0),disc=document.getElementById('cupom')?.value.toUpperCase()=='MP10'?sub*.1:0,taxa=delivery=='Entrega'?deliveryFee:0,total=sub-disc+taxa;document.getElementById('entrega').className='btn '+(delivery=='Entrega'?'':'gray');document.getElementById('retirada').className='btn '+(delivery=='Retirada'?'':'gray');document.getElementById('cart').innerHTML=cart.length?cart.map((i,idx)=>`<div class="item"><div class="row"><b>${i.qty}x ${i.name}</b><span>${money(i.price*i.qty)}</span></div><div class="row"><button class="btn gray" onclick="cart[${idx}].qty++;renderCart()">+</button><button class="btn gray" onclick="cart[${idx}].qty--;if(cart[${idx}].qty<=0)cart.splice(${idx},1);renderCart()">-</button></div></div>`).join(''):'<p class="small">Carrinho vazio.</p>';document.getElementById('totals').innerHTML=`<div class="row"><span>Subtotal</span><b>${money(sub)}</b></div><div class="row"><span>Desconto</span><b>${money(disc)}</b></div><div class="row"><span>Taxa</span><b>${money(taxa)}</b></div><div class="row" style="font-size:20px"><span>Total</span><b>${money(total)}</b></div><div class="small">PIX CPF: ${PIX}</div><button class="btn gray" onclick="copiarPix()">Copiar PIX</button>`;document.getElementById('finish').disabled=!storeOpen||!cart.length||sub<15}
 
 async function criarPagamentoMercadoPago(pedidoId, cliente, total){
- const resposta = await fetch('https://kmhhvlvkaewinhfswdzy.supabase.co/functions/v1/criar-pagamento', {
-   method:'POST',
-   headers:{
-     'Content-Type':'application/json',
-     'apikey':'sb_publishable_txROyphFSAhwp9us31hYxw_ufylL0in',
-     'Authorization':'Bearer sb_publishable_txROyphFSAhwp9us31hYxw_ufylL0in'
-   },
-   body:JSON.stringify({pedido_id:pedidoId,cliente:cliente,total:Number(total)})
- });
- const data = await resposta.json();
- if(!resposta.ok || !data.init_point){
-   console.log(data);
-   throw new Error(data.error || 'Erro ao criar pagamento Mercado Pago');
- }
- await db.from('pedidos').update({status_pagamento:'Aguardando pagamento',link_pagamento:data.init_point}).eq('id',pedidoId);
- return data.init_point;
+  const resposta = await fetch('https://kmhhvlvkaewinhfswdzy.supabase.co/functions/v1/criar-pagamento', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': 'sb_publishable_txROyphFSAhwp9us31hYxw_ufylL0in',
+      'Authorization': 'Bearer sb_publishable_txROyphFSAhwp9us31hYxw_ufylL0in'
+    },
+    body: JSON.stringify({
+      pedido_id: pedidoId,
+      cliente: cliente,
+      total: Number(total)
+    })
+  });
+  const data = await resposta.json();
+  if(!resposta.ok || !data.init_point){
+    console.log('Mercado Pago erro:', data);
+    throw new Error(data.error || data.message || 'Erro ao criar pagamento Mercado Pago');
+  }
+  try{
+    await db.from('pedidos').update({
+      status_pagamento: 'Aguardando pagamento',
+      link_pagamento: data.init_point
+    }).eq('id', pedidoId);
+  }catch(e){ console.log(e); }
+  return data.init_point;
 }
 
 async function finishOrder(){if(!storeOpen){alert('A loja está fechada no momento.');return}
 const sub=cart.reduce((s,i)=>s+i.price*i.qty,0),disc=document.getElementById('cupom').value.toUpperCase()=='MP10'?sub*.1:0,taxa=delivery=='Entrega'?deliveryFee:0,total=sub-disc+taxa,itens=cart.map(i=>`${i.qty}x ${i.name}`).join(', ');const pedido={cliente:document.getElementById('nome').value||'Cliente',telefone:document.getElementById('fone').value||'',endereco:delivery=='Entrega'?(document.getElementById('endereco').value||''):'Retirada na loja',itens:itens+(document.getElementById('obs').value?' | Obs: '+document.getElementById('obs').value:''),pagamento:document.getElementById('pagamento').value,total,status:'Recebido'};const {data,error}=await db.from('pedidos').insert([pedido]).select().single();if(error){alert('Erro ao salvar: '+error.message);return}localStorage.setItem('ultimoPedidoMP',data.id);
 await db.from('notificacoes').insert([{pedido_id:data.id,titulo:'Novo pedido recebido',mensagem:`Pedido #${data.id} - ${pedido.cliente} - ${money(total)}`,lida:false}]);mostrarStatusCliente(data.id,'Recebido');
-if(pedido.pagamento==='Mercado Pago'){
+// MP_PAGAMENTO_PATCH_OK
+if(pedido.pagamento === 'Mercado Pago'){
   try{
     const linkPagamento = await criarPagamentoMercadoPago(data.id, pedido.cliente, total);
     alert('Pedido salvo! Agora você será redirecionado para pagar com PIX ou cartão.');
-    window.open(linkPagamento,'_blank');
+    window.open(linkPagamento, '_blank');
   }catch(e){
-    alert('Pedido salvo, mas deu erro ao abrir Mercado Pago: '+e.message);
+    alert('Pedido salvo, mas não consegui abrir o Mercado Pago: ' + e.message);
   }
-  cart=[];renderCart();
+  cart=[];
+  renderCart();
   return;
-}
-// Pagamento Mercado Pago criado apenas quando selecionadoconst msg=encodeURIComponent(`Olá, quero fazer um pedido na MP Delícias:\n\n${itens}\n\nPedido: #${data.id}\nCliente: ${pedido.cliente}\nTipo: ${delivery}\nEndereço: ${pedido.endereco}\nPagamento: ${pedido.pagamento}\nTotal: ${money(total)}\nPIX CPF: ${PIX}`);window.open(`https://wa.me/${WHATSAPP}?text=${msg}`,'_blank');alert('Pedido salvo! Pedido #'+data.id);cart=[];renderCart()}
+}const msg=encodeURIComponent(`Olá, quero fazer um pedido na MP Delícias:\n\n${itens}\n\nPedido: #${data.id}\nCliente: ${pedido.cliente}\nTipo: ${delivery}\nEndereço: ${pedido.endereco}\nPagamento: ${pedido.pagamento}\nTotal: ${money(total)}\nPIX CPF: ${PIX}`);window.open(`https://wa.me/${WHATSAPP}?text=${msg}`,'_blank');alert('Pedido salvo! Pedido #'+data.id);cart=[];renderCart()}
 
 async function consultarPedidoManual(){
  const id=document.getElementById('consultaPedidoId').value;

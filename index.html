@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MP Delícias - Cliente V13 PDV</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
+<title>MP Delícias - Cliente V15 Layout App</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#fff1f5;color:#222}
 header{position:sticky;top:0;background:#fff;border-bottom:1px solid #ffd3df;z-index:9}
 .top{max-width:1200px;margin:auto;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -35,6 +35,25 @@ aside{position:sticky;top:85px;height:max-content}.small{font-size:13px;color:#6
  .price{font-size:18px}.photo,.produtoFoto{height:96px}
  .table,.table tbody,.table tr,.table td,.table th{display:block;width:100%}.table tr{margin-bottom:12px;border:1px solid #ffd3df;border-radius:16px;padding:8px}.table th{display:none}.table td{border:0;padding:6px}
 }
+
+
+/* V15 FIX LAYOUT */
+html,body{max-width:100%;overflow-x:hidden}
+body{width:100%}
+img,video,iframe{max-width:100%}
+.wrap{width:100%;max-width:1200px;overflow:hidden}
+main,aside,.box,.card,.hero,.banner,.admin{max-width:100%;overflow:hidden}
+.grid{width:100%;max-width:100%}
+.table{table-layout:auto;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+.table td,.table th{overflow-wrap:anywhere;word-break:break-word}
+input,textarea,select,button{max-width:100%}
+.row{flex-wrap:wrap}
+.cats{max-width:100%;overflow-x:auto}
+.card h3,.desc,.tag,.price{overflow-wrap:anywhere;word-break:break-word}
+.installBtn{position:fixed;left:14px;bottom:82px;background:#e91e63;color:white;border:0;border-radius:999px;padding:12px 16px;font-weight:900;box-shadow:0 8px 22px #0003;z-index:999;display:none}
+@media(max-width:1200px){.top,.wrap,.admin{max-width:100%;padding-left:12px;padding-right:12px}}
+@media(max-width:900px){.wrap{display:block}aside{width:100%;position:static;margin-top:14px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.brand{width:100%}.hero h1{font-size:24px}.table,.table tbody,.table tr,.table td,.table th{display:block;width:100%}.table tr{margin-bottom:12px;border:1px solid #ffd3df;border-radius:16px;padding:8px;background:white}.table th{display:none}.table td{border:0;padding:6px}.adminControls{flex-direction:column}.adminControls .btn,.tabs .btn{width:100%}.mobileBar{left:6px;right:6px;bottom:6px}}
 
 </style>
 <link rel="manifest" href="manifest.json">
@@ -77,13 +96,25 @@ const products=raw.map((p,i)=>({id:i+1,name:p[0],category:p[1],price:p[2],desc:p
 
 
 
+
 async function carregarConfiguracoesCliente(){
  const {data,error}=await db.from('configuracoes').select('*').order('id',{ascending:false}).limit(1).maybeSingle();
  if(!error && data){
    if(data.banner){const banner=document.querySelector('.banner'); if(banner) banner.src=data.banner;}
    if(data.promocao_dia){const hero=document.querySelector('.hero p'); if(hero) hero.innerHTML=data.promocao_dia;}
+   if(data.loja_aberta===false){storeOpen=false}else{storeOpen=true}
+   if(data.taxa_entrega!==null && data.taxa_entrega!==undefined){deliveryFee=Number(data.taxa_entrega)}
+   if(data.tempo_estimado){
+     const tempo=document.getElementById('pedidoTempo');
+     if(tempo) tempo.innerText='Tempo estimado: '+data.tempo_estimado;
+   }
  }
+ const st=document.getElementById('storeStatus');
+ if(st){st.className='status '+(storeOpen?'open':'closed');st.innerText=storeOpen?'Loja aberta':'Loja fechada';}
+ const msg=document.getElementById('closedMsg');
+ if(msg) msg.style.display=storeOpen?'none':'block';
 }
+
 async function carregarProdutosBanco(){
  const {data,error}=await db.from('produtos').select('*').order('id',{ascending:true});
  if(error){ console.log('Usando produtos internos', error); return; }
@@ -109,7 +140,8 @@ function renderCats(){const cats=['Todos',...new Set(products.map(p=>p.category)
 function renderProducts(){const q=document.getElementById('q').value.toLowerCase();const list=products.filter(p=>(p.ativo!==false)&&(cat=='Todos'||p.category==cat)&&(p.name+p.desc+p.category).toLowerCase().includes(q));document.getElementById('products').innerHTML=list.map(p=>`<div class="card">${p.promocao?'<div class="promoBadge">Promoção</div>':''}${p.destaque?'<div class="destaqueBadge">Destaque</div>':''}${p.foto?`<img class="produtoFoto" src="${p.foto}">`:`<div class="photo">${p.emoji}</div>`}<div class="tag">${p.category}</div><h3>${p.name}</h3><div class="desc">${p.desc}</div><div class="row"><div class="price">${money(p.price)}</div><button class="btn" ${!storeOpen?'disabled':''} onclick="add(${p.id})">Adicionar</button></div></div>`).join('')}
 function add(id){const p=products.find(x=>x.id==id),e=cart.find(x=>x.id==id);e?e.qty++:cart.push({...p,qty:1});renderCart()}
 function renderCart(){const sub=cart.reduce((s,i)=>s+i.price*i.qty,0),disc=document.getElementById('cupom')?.value.toUpperCase()=='MP10'?sub*.1:0,taxa=delivery=='Entrega'?deliveryFee:0,total=sub-disc+taxa;document.getElementById('entrega').className='btn '+(delivery=='Entrega'?'':'gray');document.getElementById('retirada').className='btn '+(delivery=='Retirada'?'':'gray');document.getElementById('cart').innerHTML=cart.length?cart.map((i,idx)=>`<div class="item"><div class="row"><b>${i.qty}x ${i.name}</b><span>${money(i.price*i.qty)}</span></div><div class="row"><button class="btn gray" onclick="cart[${idx}].qty++;renderCart()">+</button><button class="btn gray" onclick="cart[${idx}].qty--;if(cart[${idx}].qty<=0)cart.splice(${idx},1);renderCart()">-</button></div></div>`).join(''):'<p class="small">Carrinho vazio.</p>';document.getElementById('totals').innerHTML=`<div class="row"><span>Subtotal</span><b>${money(sub)}</b></div><div class="row"><span>Desconto</span><b>${money(disc)}</b></div><div class="row"><span>Taxa</span><b>${money(taxa)}</b></div><div class="row" style="font-size:20px"><span>Total</span><b>${money(total)}</b></div><div class="small">PIX CPF: ${PIX}</div><button class="btn gray" onclick="copiarPix()">Copiar PIX</button>`;document.getElementById('finish').disabled=!storeOpen||!cart.length||sub<15}
-async function finishOrder(){const sub=cart.reduce((s,i)=>s+i.price*i.qty,0),disc=document.getElementById('cupom').value.toUpperCase()=='MP10'?sub*.1:0,taxa=delivery=='Entrega'?deliveryFee:0,total=sub-disc+taxa,itens=cart.map(i=>`${i.qty}x ${i.name}`).join(', ');const pedido={cliente:document.getElementById('nome').value||'Cliente',telefone:document.getElementById('fone').value||'',endereco:delivery=='Entrega'?(document.getElementById('endereco').value||''):'Retirada na loja',itens:itens+(document.getElementById('obs').value?' | Obs: '+document.getElementById('obs').value:''),pagamento:document.getElementById('pagamento').value,total,status:'Recebido'};const {data,error}=await db.from('pedidos').insert([pedido]).select().single();if(error){alert('Erro ao salvar: '+error.message);return}localStorage.setItem('ultimoPedidoMP',data.id);
+async function finishOrder(){if(!storeOpen){alert('A loja está fechada no momento.');return}
+const sub=cart.reduce((s,i)=>s+i.price*i.qty,0),disc=document.getElementById('cupom').value.toUpperCase()=='MP10'?sub*.1:0,taxa=delivery=='Entrega'?deliveryFee:0,total=sub-disc+taxa,itens=cart.map(i=>`${i.qty}x ${i.name}`).join(', ');const pedido={cliente:document.getElementById('nome').value||'Cliente',telefone:document.getElementById('fone').value||'',endereco:delivery=='Entrega'?(document.getElementById('endereco').value||''):'Retirada na loja',itens:itens+(document.getElementById('obs').value?' | Obs: '+document.getElementById('obs').value:''),pagamento:document.getElementById('pagamento').value,total,status:'Recebido'};const {data,error}=await db.from('pedidos').insert([pedido]).select().single();if(error){alert('Erro ao salvar: '+error.message);return}localStorage.setItem('ultimoPedidoMP',data.id);
 await db.from('notificacoes').insert([{pedido_id:data.id,titulo:'Novo pedido recebido',mensagem:`Pedido #${data.id} - ${pedido.cliente} - ${money(total)}`,lida:false}]);mostrarStatusCliente(data.id,'Recebido');const msg=encodeURIComponent(`Olá, quero fazer um pedido na MP Delícias:\n\n${itens}\n\nPedido: #${data.id}\nCliente: ${pedido.cliente}\nTipo: ${delivery}\nEndereço: ${pedido.endereco}\nPagamento: ${pedido.pagamento}\nTotal: ${money(total)}\nPIX CPF: ${PIX}`);window.open(`https://wa.me/${WHATSAPP}?text=${msg}`,'_blank');alert('Pedido salvo! Pedido #'+data.id);cart=[];renderCart()}
 
 async function consultarPedidoManual(){

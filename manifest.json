@@ -9,7 +9,7 @@
   "description": "Sistema de pedidos online da MP Delícias",
   "icons": [
     {
-      "src": "bannermp.jpg",
+      "src": "/bannermp.jpg",
       "sizes": "512x512",
       "type": "image/jpeg",
       "purpose": "any maskable"

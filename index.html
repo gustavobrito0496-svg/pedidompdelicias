@@ -1,234 +1,32 @@
-<!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MP Delícias - Cliente V16 Mercado Pago Corrigido</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#fff1f5;color:#222}
-header{position:sticky;top:0;background:#fff;border-bottom:1px solid #ffd3df;z-index:9}
-.top{max-width:1200px;margin:auto;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.brand{display:flex;gap:12px;align-items:center}.logo{width:54px;height:54px;border-radius:18px;background:linear-gradient(135deg,#e91e63,#ffca28);display:grid;place-items:center;color:white;font-weight:900}
-.wrap{max-width:1200px;margin:auto;padding:20px;display:grid;grid-template-columns:1fr 370px;gap:20px}.banner{width:100%;border-radius:24px;margin-bottom:16px}
-.hero{background:linear-gradient(135deg,#e91e63,#ffca28);color:white;border-radius:24px;padding:24px}.hero h1{font-size:36px;margin:0 0 8px}
-.btn{border:0;border-radius:13px;padding:10px 13px;font-weight:800;cursor:pointer;background:#e91e63;color:white}.btn.dark{background:#222}.btn.green{background:#16a34a}.btn.red{background:#dc2626}.btn.gray{background:#eee;color:#222}.btn:disabled{background:#aaa}
-.field,input,select,textarea{width:100%;border:1px solid #ffd3df;border-radius:13px;padding:12px;margin:5px 0;background:#fff}
-.cats{display:flex;gap:8px;overflow:auto;margin:14px 0}.cat{background:#fff;color:#222;border:1px solid #ffd3df;white-space:nowrap}.cat.active{background:#e91e63;color:white}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card,.box{background:#fff;border:1px solid #ffd3df;border-radius:22px;padding:14px;box-shadow:0 3px 12px #00000008}
-.photo{height:105px;background:#ffe0ea;border-radius:18px;display:grid;place-items:center;font-size:42px}.tag{font-size:12px;color:#e91e63;font-weight:900}.desc{font-size:13px;color:#666;min-height:42px}.price{font-size:20px;font-weight:900}
-.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.item{border-bottom:1px solid #ffe0ea;padding:10px 0}.total{background:#fff1f5;border-radius:16px;padding:12px;margin-top:10px}
-aside{position:sticky;top:85px;height:max-content}.small{font-size:13px;color:#666}.notice{display:none;background:#222;color:#fff;border-radius:18px;padding:14px;margin:14px 0}
-.admin{max-width:1200px;margin:0 auto 30px;padding:20px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.table{width:100%;border-collapse:collapse}.table th,.table td{border-bottom:1px solid #ffe0ea;padding:9px;text-align:left;vertical-align:top;font-size:14px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}.metric{background:#fff1f5;border-radius:18px;padding:14px}.metric b{font-size:22px}.status{border-radius:50px;padding:9px 12px;font-weight:800}.open{background:#dcfce7;color:#166534}.closed{background:#e5e7eb;color:#555}
-@media print{body *{visibility:hidden}#printArea,#printArea *{visibility:visible}#printArea{position:absolute;left:0;top:0;width:100%;background:white;color:black;padding:20px}}#printArea{display:none}
-@media(max-width:900px){.wrap{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}aside{position:static}.cards{grid-template-columns:1fr 1fr}.hero h1{font-size:28px}}@media(max-width:560px){.grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr}}
-
-.whatsappFloat{position:fixed;right:18px;bottom:18px;background:#16a34a;color:white;border-radius:999px;padding:14px 18px;font-weight:900;text-decoration:none;box-shadow:0 8px 24px #0003;z-index:20}
-
-.produtoFoto{width:100%;height:105px;object-fit:cover;border-radius:18px;background:#ffe0ea}
-.promoBadge{display:inline-block;background:#ffca28;color:#222;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900;margin-bottom:5px}
-.destaqueBadge{display:inline-block;background:#e91e63;color:white;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900;margin-bottom:5px}
-
-.mobileBar{position:fixed;left:10px;right:10px;bottom:10px;background:white;border:1px solid #ffd3df;border-radius:20px;box-shadow:0 8px 24px #0002;display:flex;justify-content:space-around;gap:6px;padding:8px;z-index:50}
-.mobileBar a,.mobileBar button{border:0;background:#fff1f5;color:#222;border-radius:14px;padding:9px 10px;font-weight:900;text-decoration:none;font-size:12px}
-.installBtn{position:fixed;left:14px;bottom:82px;background:#e91e63;color:white;border:0;border-radius:999px;padding:12px 16px;font-weight:900;box-shadow:0 8px 22px #0003;z-index:51;display:none}
-@media(max-width:700px){
- body{padding-bottom:82px}
- .top{padding:10px}.logo{width:46px;height:46px}.wrap{padding:10px;gap:12px}.hero{padding:18px}.hero h1{font-size:24px}
- .card,.box{border-radius:18px;padding:12px}.grid{gap:10px}.btn{padding:10px 11px}.field,input,select,textarea{font-size:16px}
- .banner{border-radius:18px;margin-bottom:10px}.cats{padding-bottom:4px}.cat{font-size:13px}
- .price{font-size:18px}.photo,.produtoFoto{height:96px}
- .table,.table tbody,.table tr,.table td,.table th{display:block;width:100%}.table tr{margin-bottom:12px;border:1px solid #ffd3df;border-radius:16px;padding:8px}.table th{display:none}.table td{border:0;padding:6px}
-}
-
-
-/* V15 FIX LAYOUT */
-html,body{max-width:100%;overflow-x:hidden}
-body{width:100%}
-img,video,iframe{max-width:100%}
-.wrap{width:100%;max-width:1200px;overflow:hidden}
-main,aside,.box,.card,.hero,.banner,.admin{max-width:100%;overflow:hidden}
-.grid{width:100%;max-width:100%}
-.table{table-layout:auto;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
-.table td,.table th{overflow-wrap:anywhere;word-break:break-word}
-input,textarea,select,button{max-width:100%}
-.row{flex-wrap:wrap}
-.cats{max-width:100%;overflow-x:auto}
-.card h3,.desc,.tag,.price{overflow-wrap:anywhere;word-break:break-word}
-.installBtn{position:fixed;left:14px;bottom:82px;background:#e91e63;color:white;border:0;border-radius:999px;padding:12px 16px;font-weight:900;box-shadow:0 8px 22px #0003;z-index:999;display:none}
-@media(max-width:1200px){.top,.wrap,.admin{max-width:100%;padding-left:12px;padding-right:12px}}
-@media(max-width:900px){.wrap{display:block}aside{width:100%;position:static;margin-top:14px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:620px){.grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.brand{width:100%}.hero h1{font-size:24px}.table,.table tbody,.table tr,.table td,.table th{display:block;width:100%}.table tr{margin-bottom:12px;border:1px solid #ffd3df;border-radius:16px;padding:8px;background:white}.table th{display:none}.table td{border:0;padding:6px}.adminControls{flex-direction:column}.adminControls .btn,.tabs .btn{width:100%}.mobileBar{left:6px;right:6px;bottom:6px}}
-
-</style>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#e91e63">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="MP Delícias">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-</head>
-<body id="topo">
-<header><div class="top"><div class="brand"><div class="logo">MP</div><div><b style="font-size:22px">MP Delícias</b><div class="small">Pedido online • Araxá/MG</div></div></div><span id="storeStatus" class="status open">Loja aberta</span></div></header>
-<div class="wrap"><main><img src="bannermp.jpg" class="banner" onerror="this.style.display='none'"><section class="hero"><h1>Peça sua delícia sem sair de casa</h1><p>Mexidão, salgados, tapiocas, macarrões, omeletes, sucos, vitaminas e bebidas.</p><b>PIX CPF: 15978014612 • WhatsApp: +55 34 8719-6724</b></section><div id="closedMsg" class="notice">Loja fechada no momento. Voltamos amanhã às 10:30.</div><input id="q" placeholder="Buscar produto..." oninput="renderProducts()"><div id="cats" class="cats"></div><section id="products" class="grid"></section></main>
-<aside><div class="box"><h2>🛒 Carrinho</h2><div id="cart"></div><div class="row"><button id="entrega" class="btn" onclick="delivery='Entrega';renderCart()">Entrega</button><button id="retirada" class="btn gray" onclick="delivery='Retirada';renderCart()">Retirada</button></div><input id="nome" class="field" placeholder="Nome do cliente"><input id="fone" class="field" placeholder="Telefone"><input id="endereco" class="field" placeholder="Endereço completo"><textarea id="obs" class="field" placeholder="Observação geral"></textarea><select id="pagamento"><option>PIX</option><option>Dinheiro</option><option>Cartão</option></select><input id="cupom" placeholder="Cupom: MP10" oninput="renderCart()"><div id="totals" class="total"></div><button id="finish" class="btn green" style="width:100%;padding:15px;margin-top:10px" onclick="finishOrder()">Finalizar pedido</button><div id="rastreamento" class="total" style="display:none;margin-top:12px"><h3>📦 Acompanhar pedido</h3><p id="pedidoNumero" class="small"></p><div id="pedidoStatus" style="font-size:20px;font-weight:900;margin:10px 0">Recebido</div><div id="pedidoTempo" class="small">Tempo estimado: 30 a 45 minutos</div><div class="small">Atualiza quando a loja muda o status.</div></div></div>
-<div class="box" style="margin-top:16px">
-  <h3>🔎 Consultar pedido</h3>
-  <input id="consultaPedidoId" class="field" placeholder="Número do pedido">
-  <input id="consultaTelefone" class="field" placeholder="Telefone usado no pedido">
-  <button class="btn dark" onclick="consultarPedidoManual()">Consultar</button>
-</div>
-</aside></div>
-<script>
-const db=window.supabase.createClient("https://kmhhvlvkaewinhfswdzy.supabase.co","sb_publishable_txROyphFSAhwp9us31hYxw_ufylL0in");
-const WHATSAPP="553487196724",PIX="15978014612";const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-let storeOpen=true,deliveryFee=10,delivery='Entrega',cat='Todos',cart=[];
-
-const raw=[
-['Nosso Mexido Da Casa','Mexidão',29.90,'Mexido da casa. Serve 2 pessoas','🍛'],['Combo Dupla Mexidão + Coca 1l','Mexidão',62.90,'2 Mexidões + Coca-Cola 1l','🎁'],['Combo Mexidão + Coca lata','Mexidão',35.90,'Mexidão + Coca-Cola 310ml','🎁'],
-['Coxinha frango com Catupiry','Salgados',10.90,'Coxinha fresquinha com Catupiry','🥟'],['Kibe de carne','Salgados',11.00,'Kibe de carne temperada','🥟'],['Combo Salgado da Casa','Salgados',54.90,'3 salgados + Coca-Cola 1l','🎁'],['Salgado Hambúrguer','Salgados',10.90,'Hambúrguer e queijo','🍔'],['Combo Dupla Crocante + Coca 1l','Salgados',26.90,'2 coxinhas + Coca 1l','🎁'],
-['Sanduiche Natural','Sanduiche',20.90,'Sanduíche natural de frango','🥪'],
-['Tapioca De Frango Especial','Tapiocas',29.90,'Frango, muçarela e tomate','🥙'],['Tapioca De Frango Premium','Tapiocas',29.90,'Frango, muçarela e cream cheese','🥙'],['Tapioca De Frango Tradicional','Tapiocas',29.90,'Frango temperado e muçarela','🥙'],['Tapioca Mista','Tapiocas',29.90,'Presunto, muçarela e tomate','🥙'],['Tapioca De Ovo Cremosa','Tapiocas',29.90,'Ovo, muçarela e tomate','🥙'],['Tapioca De Presunto Cremoso','Tapiocas',29.90,'Presunto, muçarela e requeijão','🥙'],
-['Ragu de carne G','Macarrões G',34.90,'Molho vermelho, carne e mussarela','🍝'],['Frango cremoso G','Macarrões G',34.90,'Molho rose, frango e mussarela','🍝'],['Macarrão a calabresa G','Macarrões G',34.90,'Calabresa, tomate, milho e mussarela','🍝'],['Especial da casa G','Macarrões G',34.90,'Frango, bacon e mussarela','🍝'],['Bolonhesa G','Macarrões G',34.90,'Carne bovina, palmito e parmesão','🍝'],['Misto G','Macarrões G',34.90,'Carne, frango, milho e requeijão','🍝'],
-['Ragu de carne P','Macarrões P',26.90,'Molho vermelho, carne e mussarela','🍝'],['Frango cremoso P','Macarrões P',26.90,'Molho rose, frango e mussarela','🍝'],['Macarrão a calabresa P','Macarrões P',26.90,'Calabresa, milho e mussarela','🍝'],['Especial da casa P','Macarrões P',26.90,'Frango, bacon e mussarela','🍝'],['Bolonhesa P','Macarrões P',26.90,'Carne bovina, palmito e parmesão','🍝'],['Misto P','Macarrões P',26.90,'Carne, frango e requeijão','🍝'],
-['Omelete Misto','Omeletes',25.90,'Ovo, presunto, muçarela e orégano','🍳'],['Omelete De Frango','Omeletes',25.90,'Frango, muçarela e requeijão','🍳'],['Omelete Cremoso','Omeletes',25.90,'Requeijão, cheddar e cream cheese','🍳'],['Omelete Clássico','Omeletes',25.90,'Ovos, sal e cheiro verde','🍳'],['Omelete Fit','Omeletes',25.90,'Tomate, palmito, cebola e milho','🍳'],['Omelete De Queijo','Omeletes',25.90,'Muçarela, requeijão e orégano','🍳'],
-['Suco Morango 500 ml','Sucos Naturais',19.90,'Suco refrescante de morango','🥤'],['Suco Maracujá 500 ml','Sucos Naturais',19.90,'Suco de maracujá','🥤'],['Suco Manga 500ml','Sucos Naturais',19.90,'Suco de manga','🥤'],['Suco Acerola com Laranja','Sucos Naturais',19.90,'Acerola com laranja','🥤'],
-['Vitamina Banana Com Morango 500 ml','Vitaminas',22.90,'Banana com morango','🥛'],['Vitamina Manga 500 ml','Vitaminas',22.90,'Vitamina de manga','🥛'],['Vitamina De Maracujá 500 ml','Vitaminas',22.90,'Vitamina de maracujá','🥛'],['Vitamina Morango 500 ml','Vitaminas',22.90,'Vitamina de morango','🥛'],['Vitamina de açai 500 ml','Vitaminas',22.90,'Açaí cremoso','🥛'],
-['Refrigerante Coca Cola 1l','Bebidas',11.99,'Coca-Cola 1 litro','🥤'],['Fanta Uva 220ml','Bebidas',6.00,'Lata 220ml','🥤'],['Fanta Laranja Mini Lata 220ml','Bebidas',6.00,'Lata 220ml','🥤'],['Coca - Cola Lata 350 Ml','Bebidas',8.00,'Lata unidade','🥤'],['Suco Del Valle Uva 250ml','Bebidas',6.00,'Embalagem 250ml','🥤'],['Água Mineral Crystal 500ml','Bebidas',4.00,'Garrafa 500ml','💧'],['Mini Garrafa De Coca-Cola','Bebidas',6.00,'Mini garrafa','🥤']
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MP Delícias | Cardápio Digital</title><style>
+:root{--pink:#c51c70;--rose:#fff1f7;--gold:#e9b64b;--ink:#292333;--muted:#817885}*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:#faf8fa}button,input,select{font:inherit}button{cursor:pointer}header{background:linear-gradient(105deg,#9f1155,#d6277e);color:white;padding:12px max(20px,calc((100vw - 1250px)/2));position:sticky;top:0;z-index:10;box-shadow:0 2px 10px #0002}.nav{display:flex;align-items:center;justify-content:space-between;gap:15px}.brand{font-size:24px;font-weight:900;letter-spacing:-1px}.brand span{color:#ffd36d}.navlinks{display:flex;gap:20px}.navlinks a{color:white;text-decoration:none;font-size:14px;font-weight:bold}.wrap{max-width:1250px;margin:auto;padding:20px}.hero{border-radius:18px;min-height:220px;background:radial-gradient(circle at 80% 40%,#f8c14b 0 10%,transparent 11%),linear-gradient(115deg,#8b0f4c,#d7297e 68%,#f38cb4);color:white;padding:34px 45px;display:flex;justify-content:space-between;align-items:center;overflow:hidden}.hero h1{font-size:clamp(30px,5vw,55px);line-height:1;margin:0 0 10px}.hero p{max-width:430px;font-size:17px}.hero .emoji{font-size:100px;filter:drop-shadow(0 10px 10px #0003)}.store{display:flex;align-items:center;gap:15px;margin:20px 0}.logo{width:75px;height:75px;border-radius:16px;background:linear-gradient(130deg,#c51c70,#f0bd51);color:white;display:grid;place-items:center;font-weight:900;text-align:center;font-size:20px;box-shadow:0 2px 12px #0002}.store h2{margin:0 0 7px}.store small{color:var(--muted)}.layout{display:grid;grid-template-columns:minmax(0,1fr) 305px;gap:22px;align-items:start}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.toolbar input,.toolbar select,.checkout input,.checkout select{background:white;border:1px solid #e5dce1;border-radius:10px;padding:13px;outline-color:var(--pink)}.toolbar input{flex:1;min-width:170px}.toolbar select{max-width:210px}.section h2{font-size:22px;margin:26px 0 14px}.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.product{border:1px solid #eee5eb;border-radius:13px;background:white;padding:14px;display:flex;gap:12px;justify-content:space-between;min-height:142px;box-shadow:0 2px 7px #00000006}.product h3{font-size:15px;margin:0 0 7px}.product p{font-size:12px;line-height:1.4;color:var(--muted);margin:0 0 14px}.price{font-weight:800;color:#333}.photo{flex:0 0 98px;min-height:100px;border-radius:11px;background:linear-gradient(135deg,#fff0d6,#f5c9db);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative}.photo b{font-size:43px}.add{background:var(--pink);border:0;color:white;border-radius:50%;font-size:23px;width:32px;height:32px;position:absolute;bottom:6px;right:6px}.cart{position:sticky;top:88px;background:white;border:1px solid #eee3e8;border-radius:14px;padding:18px;box-shadow:0 3px 15px #00000008}.cart h3{margin:0 0 14px}.empty{text-align:center;color:#9d929b;padding:25px 0}.empty div{font-size:50px}.cartline{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid #f2e9ee;padding:12px 0;font-size:13px}.cartline small{color:var(--muted)}.qty{display:flex;align-items:center;gap:6px}.qty button{border:1px solid #ead8e3;background:white;border-radius:7px;width:25px;height:25px}.total{display:flex;justify-content:space-between;font-weight:800;margin:18px 0}.primary{background:var(--pink);color:white;border:0;border-radius:10px;padding:13px 16px;font-weight:800;width:100%}.primary:disabled{opacity:.5;cursor:not-allowed}.coupon{display:flex;gap:6px;margin-top:12px}.coupon input{min-width:0;width:100%;border:1px solid #ddd;border-radius:8px;padding:9px}.coupon button{border:0;border-radius:8px;background:#f6dfe9;color:#9c1756;font-weight:bold;padding:9px}.info{background:#fff8e7;border:1px solid #f7e3a5;border-radius:10px;padding:12px;margin-top:14px;font-size:12px;line-height:1.5}.checkout{display:none;margin-top:15px;border-top:1px solid #eee;padding-top:12px}.checkout.open{display:block}.checkout label{font-size:12px;font-weight:bold;display:block;margin:12px 0 5px}.checkout input,.checkout select{width:100%}.checkout .row{display:flex;gap:8px}.checkout .row>div{flex:1;min-width:0}.notice{font-size:12px;color:var(--muted);margin-top:10px}.tag{font-size:11px;background:#fff0c8;color:#7c5300;padding:5px 8px;border-radius:20px;display:inline-block;margin-top:7px}footer{text-align:center;color:#8c7d87;padding:30px;font-size:13px}.mobilecart{display:none}.modalbg{display:none;position:fixed;inset:0;background:#0008;z-index:30;align-items:center;justify-content:center;padding:15px}.modalbg.show{display:flex}.modal{background:white;border-radius:18px;max-width:460px;width:100%;padding:22px;max-height:90vh;overflow:auto}.modal h2{margin-top:0}.modal .close{float:right;background:none;border:0;font-size:25px}.extra{display:flex;justify-content:space-between;gap:8px;padding:11px 0;border-bottom:1px solid #eee;font-size:14px}.extra input{accent-color:var(--pink)}.modal textarea{width:100%;border:1px solid #ddd;border-radius:10px;padding:10px;min-height:70px;resize:vertical}.pill{background:#ffe5f1;color:#ae155b;border-radius:20px;padding:5px 10px;font-size:12px;font-weight:bold}.adminlink{font-size:12px;color:#ad9aa4}@media(max-width:900px){.layout{grid-template-columns:1fr}.cart{position:static}.navlinks{gap:10px}.hero{padding:25px}.hero .emoji{font-size:65px}}@media(max-width:600px){header{padding:12px 15px}.navlinks a{font-size:12px}.navlinks a:last-child{display:none}.wrap{padding:12px}.hero{min-height:175px}.hero p{font-size:14px}.hero .emoji{font-size:50px}.products{grid-template-columns:1fr}.product{min-height:120px}.cart{margin-bottom:70px}.mobilecart{display:block;position:fixed;bottom:10px;left:12px;right:12px;z-index:12;box-shadow:0 5px 20px #0004}.store h2{font-size:19px}.logo{width:60px;height:60px;font-size:17px}}
+</style></head><body><header><div class="nav"><div class="brand">MP <span>DELÍCIAS</span></div><nav class="navlinks"><a href="#inicio">⌂ Início</a><a href="#combos">✦ Promoções</a><a href="#carrinho">▣ Pedidos</a><a href="#sobre">ⓘ Informações</a></nav></div></header><main class="wrap" id="inicio"><section class="hero"><div><div class="pill">💗 Feito com carinho em Araxá</div><h1>MP DELÍCIAS</h1><p>Daquela coxinha crocante ao mexidão caprichado. Seu pedido favorito está aqui!</p></div><div class="emoji">🍝🥤</div></section><div class="store"><div class="logo">MP<br>DELÍCIAS</div><div><h2>MP DELÍCIAS</h2><small>📍 Araxá – MG · Supermercado Bahamas Mix</small><br><span class="tag">🕒 Horário habitual: 10h30 às 20h · confirme disponibilidade</span></div></div><div class="layout"><div><div class="toolbar"><select id="category"><option value="">Todas as categorias</option></select><input id="search" placeholder="🔎 Busque por um produto"></div><div id="sections"></div></div><aside class="cart" id="carrinho"><h3>🛍️ Sua sacola</h3><div id="cartitems"></div><div id="cartbottom" style="display:none"><div class="coupon"><input id="coupon" placeholder="Cupom de desconto"><button onclick="applyCoupon()">Aplicar</button></div><div id="discountmsg" class="notice"></div><div class="total"><span>Total dos produtos</span><span id="subtotal"></span></div><button class="primary" id="checkoutbtn" onclick="toggleCheckout()">Continuar pedido</button><div class="checkout" id="checkout"><h3>Finalizar pedido</h3><label>Seu nome *</label><input id="customer" placeholder="Nome completo"><label>WhatsApp *</label><input id="phone" placeholder="(34) 99999-9999"><label>Como deseja receber? *</label><select id="delivery" onchange="deliveryChange()"><option value="entrega">Entrega</option><option value="retirada">Retirar no balcão</option></select><div id="addressbox"><label>Endereço completo *</label><input id="address" placeholder="Rua, número, bairro e complemento"></div><label>Forma de pagamento</label><select id="payment"><option>PIX (confirmar com a loja)</option><option>Dinheiro</option><option>Cartão na entrega/retirada</option></select><label>Observações</label><input id="orderNote" placeholder="Ex.: sem cebola, troco para R$ 50"><div class="info">A taxa de entrega será confirmada pela loja no WhatsApp. Este protótipo não cobra online e não envia pedidos automaticamente ao painel.</div><button class="primary" style="margin-top:12px" onclick="sendOrder()">Enviar pedido pelo WhatsApp</button></div></div><div class="info" id="sobre">📍 Av. José Ananias de Aguiar, 4400 – Bahamas Mix, Araxá/MG.<br>☎️ Pedidos: (34) 98719-6724</div></aside></div></main><button class="primary mobilecart" onclick="document.getElementById('carrinho').scrollIntoView({behavior:'smooth'})">🛍️ Ver sacola <span id="mobiletotal">(0 itens)</span></button><footer>MP Delícias © 2026 · Cardápio demonstrativo. Preços e disponibilidade sujeitos à confirmação.<br><span class="adminlink">Versão de teste: integração com banco de dados e pagamentos ainda não ativada.</span></footer><div class="modalbg" id="modalbg"><div class="modal"><button class="close" onclick="closeModal()">×</button><div id="modalcontent"></div></div></div><script>
+const products=[
+{id:1,name:'Mexidão da Casa',cat:'Mexidões',price:26.90,emoji:'🍛',desc:'Mexidão caprichado com bacon, calabresa, carne ou frango desfiado e pururuca.'},
+{id:2,name:'Macarrão de Frango Cremoso',cat:'Macarrões',price:24.90,emoji:'🍝',desc:'Macarrão com frango e molho cremoso.'},
+{id:3,name:'Macarrão com Calabresa',cat:'Macarrões',price:24.90,emoji:'🍝',desc:'Macarrão com calabresa e molho saboroso.'},
+{id:4,name:'Macarrão ao Ragu de Carne',cat:'Macarrões',price:24.90,emoji:'🍝',desc:'Massa com ragu de carne. Valor inicial a confirmar.'},
+{id:5,name:'Omelete Clássico',cat:'Omeletes',price:19.90,emoji:'🍳',desc:'Omelete preparado na hora.'},
+{id:6,name:'Omelete de Frango Cremoso',cat:'Omeletes',price:19.90,emoji:'🍳',desc:'Omelete recheado com frango cremoso. Preço a confirmar.'},
+{id:7,name:'Tapioca Mista',cat:'Tapiocas',price:15,emoji:'🫓',desc:'Tapioca com presunto e muçarela.'},
+{id:8,name:'Tapioca de Frango Cremoso',cat:'Tapiocas',price:null,emoji:'🫓',desc:'Tapioca recheada com frango cremoso e requeijão.'},
+{id:9,name:'Coxinha Crocante',cat:'Salgados',price:null,emoji:'🥟',desc:'Coxinha douradinha com recheio saboroso.'},
+{id:10,name:'Coxinha de Carne com Catupiry',cat:'Salgados',price:null,emoji:'🥟',desc:'Coxinha recheada com carne moída e catupiry.'},
+{id:11,name:'Enroladinho de Presunto e Muçarela',cat:'Salgados',price:null,emoji:'🥐',desc:'Salgado assado com presunto e muçarela.'},
+{id:12,name:'Combo Dupla Mexidão + Coca 1L',cat:'Combos',price:62.90,emoji:'🍛',desc:'Dois mexidões da casa e um refrigerante Coca-Cola 1 litro.'},
+{id:13,name:'Explosão Crocante',cat:'Combos',price:49.90,emoji:'🍟',desc:'Batata, quatro salgados, carne, molho e refrigerante 1 litro. Composição e valor a confirmar.'},
+{id:14,name:'Combo Tropical',cat:'Combos',price:null,emoji:'🥤',desc:'Tapioca de frango com requeijão e suco de morango 500 ml.'},
+{id:15,name:'Suco Natural de Morango',cat:'Sucos e Bebidas',price:null,emoji:'🍓',desc:'Suco natural de morango geladinho.'},
+{id:16,name:'Suco Natural de Maracujá',cat:'Sucos e Bebidas',price:null,emoji:'🥭',desc:'Suco natural refrescante.'},
+{id:17,name:'Milk Shake Blue Ice',cat:'Sucos e Bebidas',price:null,emoji:'🥤',desc:'Milk shake sabor Blue Ice.'},
+{id:18,name:'Bolo no Pote',cat:'Sobremesas',price:12,emoji:'🍰',desc:'Bolo no pote Livi Doceria. Sabores sujeitos à disponibilidade.'},
+{id:19,name:'Pudim 120 ml',cat:'Sobremesas',price:null,emoji:'🍮',desc:'Pudim individual de 120 ml.'}
 ];
-const products=raw.map((p,i)=>({id:i+1,name:p[0],category:p[1],price:p[2],desc:p[3],emoji:p[4]}));
-
-
-
-
-async function carregarConfiguracoesCliente(){
- const {data,error}=await db.from('configuracoes').select('*').order('id',{ascending:false}).limit(1).maybeSingle();
- if(!error && data){
-   if(data.banner){const banner=document.querySelector('.banner'); if(banner) banner.src=data.banner;}
-   if(data.promocao_dia){const hero=document.querySelector('.hero p'); if(hero) hero.innerHTML=data.promocao_dia;}
-   if(data.loja_aberta===false){storeOpen=false}else{storeOpen=true}
-   if(data.taxa_entrega!==null && data.taxa_entrega!==undefined){deliveryFee=Number(data.taxa_entrega)}
-   if(data.tempo_estimado){
-     const tempo=document.getElementById('pedidoTempo');
-     if(tempo) tempo.innerText='Tempo estimado: '+data.tempo_estimado;
-   }
- }
- const st=document.getElementById('storeStatus');
- if(st){st.className='status '+(storeOpen?'open':'closed');st.innerText=storeOpen?'Loja aberta':'Loja fechada';}
- const msg=document.getElementById('closedMsg');
- if(msg) msg.style.display=storeOpen?'none':'block';
-}
-
-async function carregarProdutosBanco(){
- const {data,error}=await db.from('produtos').select('*').order('id',{ascending:true});
- if(error){ console.log('Usando produtos internos', error); return; }
- if(data && data.length>0){
-   products.length=0;
-   data.forEach(p=>{
-     products.push({
-       id:p.id,
-       name:p.nome,
-       category:p.categoria || 'Outros',
-       price:Number(p.preco || 0),
-       desc:p.descricao || '',
-       emoji:p.emoji || '🍽️',
-       foto:p.foto || '',
-       destaque:p.destaque === true,
-       promocao:p.promocao === true,
-       ativo:p.ativo !== false
-     });
-   });
- }
-}
-function renderCats(){const cats=['Todos',...new Set(products.map(p=>p.category))];document.getElementById('cats').innerHTML=cats.map(c=>`<button class="btn cat ${cat==c?'active':''}" onclick="cat='${c}';renderProducts();renderCats()">${c}</button>`).join('')}
-function renderProducts(){const q=document.getElementById('q').value.toLowerCase();const list=products.filter(p=>(p.ativo!==false)&&(cat=='Todos'||p.category==cat)&&(p.name+p.desc+p.category).toLowerCase().includes(q));document.getElementById('products').innerHTML=list.map(p=>`<div class="card">${p.promocao?'<div class="promoBadge">Promoção</div>':''}${p.destaque?'<div class="destaqueBadge">Destaque</div>':''}${p.foto?`<img class="produtoFoto" src="${p.foto}">`:`<div class="photo">${p.emoji}</div>`}<div class="tag">${p.category}</div><h3>${p.name}</h3><div class="desc">${p.desc}</div><div class="row"><div class="price">${money(p.price)}</div><button class="btn" ${!storeOpen?'disabled':''} onclick="add(${p.id})">Adicionar</button></div></div>`).join('')}
-function add(id){const p=products.find(x=>x.id==id),e=cart.find(x=>x.id==id);e?e.qty++:cart.push({...p,qty:1});renderCart()}
-function renderCart(){const sub=cart.reduce((s,i)=>s+i.price*i.qty,0),disc=document.getElementById('cupom')?.value.toUpperCase()=='MP10'?sub*.1:0,taxa=delivery=='Entrega'?deliveryFee:0,total=sub-disc+taxa;document.getElementById('entrega').className='btn '+(delivery=='Entrega'?'':'gray');document.getElementById('retirada').className='btn '+(delivery=='Retirada'?'':'gray');document.getElementById('cart').innerHTML=cart.length?cart.map((i,idx)=>`<div class="item"><div class="row"><b>${i.qty}x ${i.name}</b><span>${money(i.price*i.qty)}</span></div><div class="row"><button class="btn gray" onclick="cart[${idx}].qty++;renderCart()">+</button><button class="btn gray" onclick="cart[${idx}].qty--;if(cart[${idx}].qty<=0)cart.splice(${idx},1);renderCart()">-</button></div></div>`).join(''):'<p class="small">Carrinho vazio.</p>';document.getElementById('totals').innerHTML=`<div class="row"><span>Subtotal</span><b>${money(sub)}</b></div><div class="row"><span>Desconto</span><b>${money(disc)}</b></div><div class="row"><span>Taxa</span><b>${money(taxa)}</b></div><div class="row" style="font-size:20px"><span>Total</span><b>${money(total)}</b></div><div class="small">PIX CPF: ${PIX}</div><button class="btn gray" onclick="copiarPix()">Copiar PIX</button>`;document.getElementById('finish').disabled=!storeOpen||!cart.length||sub<15}
-
-async function criarPagamentoMercadoPago(pedidoId, cliente, total){
-  const resposta = await fetch('https://kmhhvlvkaewinhfswdzy.supabase.co/functions/v1/criar-pagamento', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': 'sb_publishable_txROyphFSAhwp9us31hYxw_ufylL0in',
-      'Authorization': 'Bearer sb_publishable_txROyphFSAhwp9us31hYxw_ufylL0in'
-    },
-    body: JSON.stringify({
-      pedido_id: pedidoId,
-      cliente: cliente,
-      total: Number(total)
-    })
-  });
-  const data = await resposta.json();
-  if(!resposta.ok || !data.init_point){
-    console.log('Mercado Pago erro:', data);
-    throw new Error(data.error || data.message || 'Erro ao criar pagamento Mercado Pago');
-  }
-  try{
-    await db.from('pedidos').update({
-      status_pagamento: 'Aguardando pagamento',
-      link_pagamento: data.init_point
-    }).eq('id', pedidoId);
-  }catch(e){ console.log(e); }
-  return data.init_point;
-}
-
-async function finishOrder(){if(!storeOpen){alert('A loja está fechada no momento.');return}
-const sub=cart.reduce((s,i)=>s+i.price*i.qty,0),disc=document.getElementById('cupom').value.toUpperCase()=='MP10'?sub*.1:0,taxa=delivery=='Entrega'?deliveryFee:0,total=sub-disc+taxa,itens=cart.map(i=>`${i.qty}x ${i.name}`).join(', ');const pedido={cliente:document.getElementById('nome').value||'Cliente',telefone:document.getElementById('fone').value||'',endereco:delivery=='Entrega'?(document.getElementById('endereco').value||''):'Retirada na loja',itens:itens+(document.getElementById('obs').value?' | Obs: '+document.getElementById('obs').value:''),pagamento:document.getElementById('pagamento').value,total,status:'Recebido'};const {data,error}=await db.from('pedidos').insert([pedido]).select().single();if(error){alert('Erro ao salvar: '+error.message);return}localStorage.setItem('ultimoPedidoMP',data.id);
-await db.from('notificacoes').insert([{pedido_id:data.id,titulo:'Novo pedido recebido',mensagem:`Pedido #${data.id} - ${pedido.cliente} - ${money(total)}`,lida:false}]);mostrarStatusCliente(data.id,'Recebido');
-// MP_PAGAMENTO_PATCH_OK
-if(pedido.pagamento === 'Mercado Pago'){
-  try{
-    const linkPagamento = await criarPagamentoMercadoPago(data.id, pedido.cliente, total);
-    alert('Pedido salvo! Agora você será redirecionado para pagar com PIX ou cartão.');
-    window.open(linkPagamento, '_blank');
-  }catch(e){
-    alert('Pedido salvo, mas não consegui abrir o Mercado Pago: ' + e.message);
-  }
-  cart=[];
-  renderCart();
-  return;
-}const msg=encodeURIComponent(`Olá, quero fazer um pedido na MP Delícias:\n\n${itens}\n\nPedido: #${data.id}\nCliente: ${pedido.cliente}\nTipo: ${delivery}\nEndereço: ${pedido.endereco}\nPagamento: ${pedido.pagamento}\nTotal: ${money(total)}\nPIX CPF: ${PIX}`);window.open(`https://wa.me/${WHATSAPP}?text=${msg}`,'_blank');alert('Pedido salvo! Pedido #'+data.id);cart=[];renderCart()}
-
-async function consultarPedidoManual(){
- const id=document.getElementById('consultaPedidoId').value;
- const telefone=document.getElementById('consultaTelefone').value;
- if(!id){alert('Informe o número do pedido');return}
- let query=db.from('pedidos').select('id,status,telefone').eq('id',id).single();
- const {data,error}=await query;
- if(error || !data){alert('Pedido não encontrado');return}
- if(telefone && data.telefone && String(data.telefone).trim()!=String(telefone).trim()){
-   alert('Telefone não confere com o pedido');
-   return;
- }
- localStorage.setItem('ultimoPedidoMP', data.id);
- mostrarStatusCliente(data.id,data.status);
-}
-
-function copiarPix(){navigator.clipboard.writeText(PIX);alert('PIX copiado!')}
-function textoStatus(s){return s=='Recebido'?'📥 Pedido recebido':s=='Preparando'?'👨‍🍳 Seu pedido está sendo preparado':s=='Saiu para entrega'?'🛵 Seu pedido saiu para entrega':s=='Entregue'?'✅ Pedido entregue':s=='Cancelado'?'❌ Pedido cancelado':s||'📥 Pedido recebido'}
-function mostrarStatusCliente(id,status){document.getElementById('rastreamento').style.display='block';document.getElementById('pedidoNumero').innerText='Pedido #'+id;document.getElementById('pedidoStatus').innerText=textoStatus(status)}
-async function carregarStatusCliente(){const id=localStorage.getItem('ultimoPedidoMP');if(!id)return;const {data,error}=await db.from('pedidos').select('id,status').eq('id',id).single();if(!error&&data)mostrarStatusCliente(data.id,data.status)}
-async function iniciarCliente(){await carregarConfiguracoesCliente();await carregarProdutosBanco();renderCats();renderProducts();renderCart();carregarStatusCliente();setInterval(carregarStatusCliente,7000);} iniciarCliente();
-</script><a class="whatsappFloat" href="https://wa.me/553487196724" target="_blank">💬 WhatsApp</a>
-<button id="instalarAppMP" class="installBtn" onclick="instalarAppMP()">📲 Instalar app</button>
-<div class="mobileBar"><a href="#topo">Início</a><a href="https://wa.me/553487196724" target="_blank">WhatsApp</a><a href="admin.html">Admin</a></div>
-
-<script>
-let deferredInstallMP=null;
-window.addEventListener('beforeinstallprompt',(e)=>{
- e.preventDefault();
- deferredInstallMP=e;
- const btn=document.getElementById('instalarAppMP');
- if(btn) btn.style.display='block';
-});
-async function instalarAppMP(){
- if(!deferredInstallMP){alert('No celular, use o menu do navegador e toque em Adicionar à tela inicial.');return}
- deferredInstallMP.prompt();
- await deferredInstallMP.userChoice;
- deferredInstallMP=null;
- const btn=document.getElementById('instalarAppMP');
- if(btn) btn.style.display='none';
-}
-if('serviceWorker' in navigator){
- window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
-}
-</script>
-
-</body></html>
+const cats=['Combos','Mexidões','Macarrões','Omeletes','Tapiocas','Salgados','Sucos e Bebidas','Sobremesas'];let cart=[],couponValue=0,selected=null;const fmt=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));document.getElementById('category').innerHTML+=[...cats].map(c=>`<option>${c}</option>`).join('');document.getElementById('category').onchange=render;document.getElementById('search').oninput=render;
+function render(){let term=document.getElementById('search').value.toLowerCase(),filter=document.getElementById('category').value;document.getElementById('sections').innerHTML=cats.map(c=>{if(filter&&filter!==c)return '';let list=products.filter(p=>p.cat===c&&(p.name.toLowerCase().includes(term)||p.desc.toLowerCase().includes(term)));if(!list.length)return '';return `<section class="section" id="${c==='Combos'?'combos':''}"><h2>${c}</h2><div class="products">${list.map(p=>`<article class="product"><div><h3>${esc(p.name)}</h3><p>${esc(p.desc)}</p><span class="price">${p.price===null?'Consultar valor':fmt(p.price)}</span></div><div class="photo"><b>${p.emoji}</b>${p.price!==null?`<button class="add" aria-label="Adicionar ${esc(p.name)}" onclick="openProduct(${p.id})">+</button>`:'<small style="font-size:10px">Sob consulta</small>'}</div></article>`).join('')}</div></section>`}).join('')||'<p>Nenhum produto encontrado.</p>'}
+function openProduct(id){selected=products.find(p=>p.id===id);document.getElementById('modalcontent').innerHTML=`<h2>${selected.emoji} ${esc(selected.name)}</h2><p>${esc(selected.desc)}</p><p><b>${fmt(selected.price)}</b></p><h4>Adicionais (opcionais)</h4>${[['Queijo extra',3],['Bacon extra',5],['Frango extra',5],['Molho extra',2]].map(([n,v])=>`<label class="extra"><span>${n} · +${fmt(v)}</span><input type="checkbox" class="addon" data-name="${n}" data-price="${v}"></label>`).join('')}<p class="notice">Adicionais e valores são exemplos e precisam de confirmação antes da publicação.</p><h4>Observação</h4><textarea id="itemNote" placeholder="Ex.: sem cebola"></textarea><button class="primary" onclick="addSelected()">Adicionar à sacola</button>`;document.getElementById('modalbg').classList.add('show')}
+function closeModal(){document.getElementById('modalbg').classList.remove('show')}function addSelected(){let addons=[...document.querySelectorAll('.addon:checked')].map(e=>({name:e.dataset.name,price:+e.dataset.price})),note=document.getElementById('itemNote').value.trim();let unit=selected.price+addons.reduce((s,a)=>s+a.price,0),key=JSON.stringify([selected.id,addons,note]),existing=cart.find(x=>x.key===key);if(existing)existing.qty++;else cart.push({key,name:selected.name,unit,addons,note,qty:1});closeModal();renderCart()}
+function changeQty(i,delta){cart[i].qty+=delta;if(cart[i].qty<=0)cart.splice(i,1);renderCart()}function sum(){return cart.reduce((s,x)=>s+x.qty*x.unit,0)}function renderCart(){document.getElementById('cartitems').innerHTML=cart.length?cart.map((x,i)=>`<div class="cartline"><div><b>${esc(x.name)}</b><br><small>${x.addons.map(a=>esc(a.name)).join(', ')} ${esc(x.note)}</small><br>${fmt(x.unit*x.qty)}</div><div class="qty"><button onclick="changeQty(${i},-1)">−</button>${x.qty}<button onclick="changeQty(${i},1)">+</button></div></div>`).join(''):'<div class="empty"><div>🛍️</div>Sacola vazia<br><small>Adicione seus favoritos!</small></div>';document.getElementById('cartbottom').style.display=cart.length?'block':'none';document.getElementById('subtotal').textContent=fmt(sum()*(1-couponValue));document.getElementById('mobiletotal').textContent=`(${cart.reduce((s,x)=>s+x.qty,0)} itens · ${fmt(sum()*(1-couponValue))})`}
+function applyCoupon(){let code=document.getElementById('coupon').value.trim().toUpperCase();couponValue=0;document.getElementById('discountmsg').textContent='Cupom não configurado. Consulte a loja.';renderCart()}function toggleCheckout(){document.getElementById('checkout').classList.toggle('open')}function deliveryChange(){document.getElementById('addressbox').style.display=document.getElementById('delivery').value==='entrega'?'block':'none'}
+function sendOrder(){let name=document.getElementById('customer').value.trim(),phone=document.getElementById('phone').value.trim(),delivery=document.getElementById('delivery').value,address=document.getElementById('address').value.trim(),payment=document.getElementById('payment').value,note=document.getElementById('orderNote').value.trim();if(!name||!phone||(delivery==='entrega'&&!address)){alert('Preencha nome, WhatsApp e endereço (para entrega).');return}let message=`*NOVO PEDIDO - MP DELÍCIAS*\n\n*Cliente:* ${name}\n*Telefone:* ${phone}\n*Modalidade:* ${delivery}\n${delivery==='entrega'?`*Endereço:* ${address}\n`:''}\n*Itens:*\n`+cart.map(x=>`${x.qty}x ${x.name} - ${fmt(x.qty*x.unit)}${x.addons.length?'\n  Adicionais: '+x.addons.map(a=>a.name).join(', '):''}${x.note?'\n  Obs: '+x.note:''}`).join('\n')+`\n\n*Subtotal:* ${fmt(sum())}\n*Pagamento:* ${payment}\n*Observações:* ${note||'Nenhuma'}\n\n*Taxa de entrega e disponibilidade a confirmar pela loja.*`;window.open('https://wa.me/5534987196724?text='+encodeURIComponent(message),'_blank','noopener')}
+render();renderCart();</script></body></html>
